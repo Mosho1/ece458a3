@@ -15,12 +15,22 @@
   },
   "author": "Sharon Rolel <sharonrolel@gmail.com>",
   "homepage": "https://github.com/Mosho1/react-mobx-boilerplate",
-  "dependencies": {    
+  "dependencies": {
+    "asmcrypto.js": "^2.3.0",
+    "bluebird": "^3.5.1",
+    "body-parser": "^1.18.3",
+    "cookie-parser": "^1.4.3",
+    "csurf": "^1.9.0",
     "mobx": "4.3.1",
     "mobx-react": "5.2.3",
+    "nodemailer": "^4.6.7",
     "react": "16.4.1",
     "react-dom": "16.4.1",
-    "routes": "2.1.0"
+    "routes": "2.1.0",
+    "sjcl": "^1.0.7",
+    "sqlite3": "^4.0.2",
+    "sqlstring": "^2.3.1",
+    "util.promisify-all": "^1.0.2"
   },
   "devDependencies": {
     "@types/node": "10.5.1",

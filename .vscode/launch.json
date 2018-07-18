@@ -5,13 +5,16 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "chrome",
+            "type": "node",
             "request": "launch",
-            "name": "Launch Program",
-            "port": 9222,
-            "url": "http://localhost:3000",
-            "webRoot": "${workspaceRoot}",
-            "userDataDir": "${workspaceRoot}/.vscode/chrome"
-        }
+            "name": "Server",
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "program": "${workspaceFolder}/webpack/webpack-dev-server",
+            "args": [
+                "--env.dev"
+            ]
+        },
     ]
 }
