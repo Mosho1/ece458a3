@@ -1,45 +1,52 @@
 import { observable, action } from 'mobx';
+import { Login } from '../components/Login';
+import { Search } from '../components/Search';
+import { Add } from '../components/Add';
 
 const hasWindow = typeof window !== 'undefined';
-
-export interface AppStateProps {
-  timer: number;
-}
 
 /*
 * This is the entry point for the app's state. All stores should go here.
 */
-class AppState implements AppStateProps {
-  @observable timer = 0;
-  @observable message = '';
+export class AppState {
+  @observable login: Login = null;
+  @observable search: Search = null;
+  @observable add: Add = null;
+  @observable loggedInAs: string | null = null;
 
-  intervalId: any;
+  goTo = (url: string, replace = false) =>
+    replace
+      ? history.replaceState(null, "", url)
+      : history.pushState(null, "", url)
 
-  constructor() {
-    if (hasWindow) {
-      this.intervalId = setInterval(this.incrementTimer, 1000);
+  apiRequest = async (path: string, init?: RequestInit) => {
+    const res = await fetch(`/api/${path.replace(/^\//, '')}`, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'same-origin',
+      ...init,
+    });
+
+    if (res.status !== 200) {
+      throw new Error(res.statusText);
     }
+
+    return res;
   }
 
-  @action incrementTimer = () => {
-    this.timer += 1;
-  }
-
-  @action setMessage(message: string) {
-    this.message = message;
-  }
-
-  @action resetTimer() {
-    this.timer = 0;
-  }
-
-  reload(store: AppStateProps) {
-    Object.assign(this, store);
+  @action
+  reload(store?: AppState) {
+    if (store) {
+      this.login = store.login;
+      this.search = store.search;
+      this.add = store.add;
+    }
     return this;
   }
 
   unload() {
-    clearInterval(this.intervalId);
+
   }
 }
 

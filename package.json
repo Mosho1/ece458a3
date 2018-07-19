@@ -16,6 +16,8 @@
   "author": "Sharon Rolel <sharonrolel@gmail.com>",
   "homepage": "https://github.com/Mosho1/react-mobx-boilerplate",
   "dependencies": {
+    "@material-ui/core": "^1.4.0",
+    "@material-ui/icons": "^1.1.0",
     "asmcrypto.js": "^2.3.0",
     "bluebird": "^3.5.1",
     "body-parser": "^1.18.3",

@@ -109,6 +109,10 @@ api.post('/login', async (req, res, next) => {
             WHERE username = ${body.username}
         `);
 
+        if (!row) {
+            throw new Error('Could not authenticate user');
+        }
+
         const password = getHash(body.password, row.salt);
         if (password !== row.password) {
             throw new Error('Wrong password.');

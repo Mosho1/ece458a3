@@ -20,7 +20,7 @@ export interface Route {
   // This is useful because routes typically need additional data loading logic _after_ they mount.
   // For example - a books component might require data after loading (and a loading indicator can be
   // shown in the meantime).
-  onEnter?: (appState: AppState, params: object) => Promise<void>;
+  onEnter?: (appState: AppState, params: object) => void | Promise<void>;
 }
 
 let routes: Route[];
@@ -35,25 +35,37 @@ export const defaultRoute: Route = {
   }
 };
 
+const authenticateRoute = (appState: AppState, params) => {
+  if (appState.loggedInAs === null) {
+    appState.goTo('/login', true);
+  }
+};
+
 routes = [{
-  route: '/users/?:id?',
-  async onEnter(appState, params: { id?: string }) {
-    appState.setMessage('');
-    if (params.id) { // simuate additional fetching that needs to happen after route loads
-      appState.setMessage(`fetching data for user ${params.id}...`);
-      await new Promise(r => setTimeout(r, 500));
-      appState.setMessage(`data fetched for user ${params.id}`);
-    }
-  },
-  async getComponent(appState, params: { id: string }) {
-    const Users = await getRoute(import('./components/Users'));
-    return <Users id={params.id} appState={appState} />;
+  route: '/login',
+  async getComponent(appState, params) {
+    const Login = await getRoute(import('./components/Login'));
+    return <Login context={'login'} appState={appState} />;
   }
 }, {
-  route: '/about',
+  route: '/register',
   async getComponent(appState, params) {
-    const About = await getRoute(import('./components/About'));
-    return <About />;
+    const Login = await getRoute(import('./components/Login'));
+    return <Login context={'register'} appState={appState} />;
+  }
+}, {
+  route: '/add',
+  onEnter: authenticateRoute,
+  async getComponent(appState, params) {
+    const Add = await getRoute(import('./components/Add'));
+    return <Add appState={appState} />;
+  }
+}, {
+  route: '/search',
+  onEnter: authenticateRoute,
+  async getComponent(appState, params) {
+    const Search = await getRoute(import('./components/Search'));
+    return <Search appState={appState} />;
   }
 }];
 

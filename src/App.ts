@@ -1,10 +1,10 @@
 import { configure, observable, action } from 'mobx';
 import { Router } from 'routes';
 import { routes, defaultRoute, Route } from './routes';
-import AppState, { AppStateProps } from './stores/AppState';
+import AppState from './stores/AppState';
 
 configure({
-  enforceActions: true
+  // enforceActions: true
 });
 
 const hasWindow = typeof window !== 'undefined';
@@ -19,7 +19,8 @@ class App {
   // our router
   router: Router<Route>;
 
-  constructor(appState?: AppStateProps, router?: Router<Route>) {
+  constructor(appState?: AppState, router?: Router<Route>) {
+    window['app'] = this;
 
     // we optionally reload the state useful for hot reload and server-side rendering, 
     // but also as an extension point for restoring the data from localStorage.
@@ -45,8 +46,8 @@ class App {
     const params = match ? match.params : {};
     const route = match ? match.fn : defaultRoute;
     const onEnter = route.onEnter || (() => Promise.resolve());
-    route.getComponent(this.appState, params).then(this.setRoute);
     await onEnter.call(route, this.appState, params);
+    route.getComponent(this.appState, params).then(this.setRoute);
   }
 
   pushState: any;

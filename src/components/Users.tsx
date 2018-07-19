@@ -16,7 +16,6 @@ class Users extends React.Component<{ id: string, appState: AppState }, any> {
           <li><Link href="/users/3">3</Link></li>
         </ul>
         <div>route params: <code>{JSON.stringify({ id }, null, 4)}</code></div>
-        <div>message: {appState.message}</div>
       </div>
     );
   }
