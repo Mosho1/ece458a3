@@ -19,9 +19,11 @@ api.use(bodyParser.json());
 api.use(cookieParser());
 
 let cookieName = 'cookieName';
+let cookieSalt = 'cookieSalt';
 
 (async () => {
     cookieName = (await generateToken()).slice(0, 10);
+    cookieSalt = await generateToken();
 })();
 
 api.use((req, res, next) => {
@@ -136,7 +138,7 @@ api.post('/login', async (req, res, next) => {
 
         await db.runAsync(`
             UPDATE users 
-                SET authToken = "${getPbkdf2Hash(token, cookieName)}"
+                SET authToken = "${getPbkdf2Hash(token, cookieSalt)}"
             WHERE username = ${body.username}
         `);
 
@@ -152,7 +154,7 @@ const getUser = async (authToken) => {
     const row = await db.getAsync(`
         SELECT *
         FROM users 
-        WHERE authToken = "${getPbkdf2Hash(authToken, cookieName)}"
+        WHERE authToken = "${getPbkdf2Hash(authToken, cookieSalt)}"
     `);
 
     return row || null;
@@ -181,7 +183,7 @@ api.post('/refresh', async (req, res, next) => {
 
         await db.runAsync(`
             UPDATE users 
-                SET authToken = "${getPbkdf2Hash(token, cookieName)}"
+                SET authToken = "${getPbkdf2Hash(token, cookieSalt)}"
             WHERE id = ${user.id}
         `);
 
@@ -201,7 +203,7 @@ api.post('/logout', async (req, res, next) => {
         await db.runAsync(`
             UPDATE users 
                 SET authToken = NULL
-            WHERE authToken = "${getPbkdf2Hash(req.cookies[cookieName], cookieName)}"
+            WHERE authToken = "${getPbkdf2Hash(req.cookies[cookieName], cookieSalt)}"
         `);
 
         res.clearCookie(cookieName);
