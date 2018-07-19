@@ -35,20 +35,27 @@ export const defaultRoute: Route = {
   }
 };
 
-const authenticateRoute = (appState: AppState, params) => {
+const authenticateRoute = async (appState: AppState, params) => {
   if (appState.loggedInAs === null) {
-    appState.goTo('/login', true);
+    await appState.refreshToken();
+    if (appState.loggedInAs === null) {
+      appState.goTo('/login', true);
+    } else {
+      appState.goTo('/add');
+    }
   }
 };
 
 routes = [{
   route: '/login',
+  onEnter: authenticateRoute,
   async getComponent(appState, params) {
     const Login = await getRoute(import('./components/Login'));
     return <Login context={'login'} appState={appState} />;
   }
 }, {
   route: '/register',
+  onEnter: authenticateRoute,
   async getComponent(appState, params) {
     const Login = await getRoute(import('./components/Login'));
     return <Login context={'register'} appState={appState} />;

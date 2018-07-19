@@ -76,7 +76,8 @@ export class Login extends React.Component<Props, any> {
   }
 
   async login() {
-    const res = await this.props.appState.apiRequest('login', {
+    const {appState} = this.props;
+    const res = await appState.apiRequest('login', {
       method: 'POST',
       body: JSON.stringify({
         username: this.mState.form.username,
@@ -84,8 +85,9 @@ export class Login extends React.Component<Props, any> {
       })
     });
     runInAction(() => {
-      this.props.appState.loggedInAs = this.mState.form.username;
+      appState.loggedInAs = this.mState.form.username;
     });
+    appState.goTo('/add');
     this.resetForm();
   }
 
@@ -107,10 +109,7 @@ export class Login extends React.Component<Props, any> {
     try {
       this.mState.loading = true;
       switch (context) {
-        case 'login':
-          await this.login();
-          appState.goTo('/add');
-          break;
+        case 'login': await this.login(); break;
         case 'register': await this.register(); break;
       }
     } finally {

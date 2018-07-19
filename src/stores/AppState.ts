@@ -1,4 +1,4 @@
-import { observable, action } from 'mobx';
+import { observable, action, runInAction } from 'mobx';
 import { Login } from '../components/Login';
 import { Search } from '../components/Search';
 import { Add } from '../components/Add';
@@ -13,6 +13,18 @@ export class AppState {
   @observable search: Search = null;
   @observable add: Add = null;
   @observable loggedInAs: string | null = null;
+
+  async refreshToken() {
+    const res = await this.apiRequest('refresh', {
+      method: 'POST'
+    });
+
+    const user = await res.json();
+
+    runInAction(() => {
+      this.loggedInAs = user.username;
+    });
+  }
 
   goTo = (url: string, replace = false) =>
     replace

@@ -137,6 +137,58 @@ api.post('/login', async (req, res, next) => {
     }
 });
 
+const getUser = async (authToken) => {
+    const row = await db.getAsync(`
+        SELECT *
+        FROM users 
+        WHERE authToken = ${authToken}
+    `);
+
+    return row || null;
+};
+
+const getUserId = async (authToken) => {
+    const user = await getUser(authToken);
+    return user ? user.id : null;
+};
+
+api.post('/refresh', async (req, res, next) => {
+    try {
+        const { body, cookies } = req;
+
+        if (!cookies.auth) {
+            return res.sendStatus(401);
+        }
+
+        const user = await getUser(cookies.auth);
+
+        if (!user) {
+            return res.sendStatus(401);
+        }
+
+        const token = await generateToken();
+
+        await db.runAsync(`
+            UPDATE users 
+                SET authToken = "${token}"
+            WHERE id = ${user.id}
+        `);
+
+        res.cookie('auth', token, {
+            httpOnly: true,
+            maxAge: 86400
+            // secure: true
+        });
+
+        res.send({
+            username: user.username
+        });
+    } catch (e) {
+        console.error(e);
+        res.sendStatus(400);
+    }
+});
+
 api.post('/logout', async (req, res, next) => {
     try {
         await db.runAsync(`
@@ -152,16 +204,6 @@ api.post('/logout', async (req, res, next) => {
         res.sendStatus(401);
     }
 });
-
-const getUserId = async (authToken) => {
-    const row = await db.getAsync(`
-        SELECT id
-        FROM users 
-        WHERE authToken = ${authToken}
-    `);
-
-    return row ? row.id : null;
-};
 
 api.post('/passwords', async (req, res, next) => {
 
