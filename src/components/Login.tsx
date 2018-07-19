@@ -77,15 +77,17 @@ export class Login extends React.Component<Props, any> {
 
   async login() {
     const {appState} = this.props;
+    const {username, password} = this.mState.form;
     const res = await appState.apiRequest('login', {
       method: 'POST',
       body: JSON.stringify({
-        username: this.mState.form.username,
-        password: this.mState.form.password,
+        username,
+        password,
       })
     });
     runInAction(() => {
-      appState.loggedInAs = this.mState.form.username;
+      appState.loggedInAs = username;
+      appState.masterKey = password;
     });
     appState.goTo('/add');
     this.resetForm();

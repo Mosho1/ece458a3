@@ -14,7 +14,7 @@ export interface Route {
   // This is how you tell what route gets what component, the decision can be made asynchronously
   // and data fetching can also occur here. Typically you'd initialize the data a page needs 
   // to a consistent state here 
-  getComponent: (appState: AppState, params: object) => Promise<JSX.Element>;
+  getComponent?: (appState: AppState, params: object) => Promise<JSX.Element>;
   // This optionally (if passed) gets called after the routing happens. Server-Side-Rendering also 
   // waits for this to finish before the route actually changes. 
   // This is useful because routes typically need additional data loading logic _after_ they mount.
@@ -29,10 +29,10 @@ const getRoute = p => p.then(mod => mod.default);
 
 export const defaultRoute: Route = {
   route: '/',
-  async getComponent(appState, params) {
-    const Home = await getRoute(import('./components/Home'));
-    return <Home appState={appState} />;
-  }
+  onEnter(appState: AppState) {
+    appState.goTo('/add');
+    return false;
+  },
 };
 
 const authenticateRoute = (redirectToLogin = true) => async (appState: AppState, params) => {

@@ -82,6 +82,16 @@ api.get('/users', async (req, res, next) => {
     }
 });
 
+api.get('/sites', async (req, res, next) => {
+    try {
+        const users = await db.allAsync(`SELECT * from passwords`);
+        res.send(users);
+    } catch (e) {
+        console.error(e);
+        res.sendStatus(400);
+    }
+});
+
 api.get('/confirm', async (req, res, next) => {
     try {
         const row = await db.getAsync(`
@@ -257,6 +267,7 @@ api.get('/passwords/search', async (req, res, next) => {
 
         const rows = await db.allAsync(`
             SELECT 
+                id,
                 site,
                 site_username,
                 site_password

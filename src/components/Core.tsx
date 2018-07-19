@@ -21,10 +21,9 @@ const styles = (theme: Theme) => createStyles({
     position: 'relative',
     display: 'flex',
     width: '100%',
+    height: '100vh'
   },
   appBar: {
-    // width: `calc(100% - ${drawerWidth}px)`,
-    // marginLeft: drawerWidth,
   },
   title: {
     whiteSpace: 'nowrap'
@@ -38,6 +37,7 @@ const styles = (theme: Theme) => createStyles({
     flexGrow: 1,
     backgroundColor: theme.palette.background.default,
     padding: theme.spacing.unit * 3,
+    overflowY: 'scroll'
   },
   flex: {
     flexGrow: 1
@@ -75,10 +75,20 @@ class Core extends React.Component<Props> {
       method: 'POST',
     });
     runInAction(() => {
-      appState.loggedInAs = null;
+      appState.resetState();
     });
     appState.goTo('/login');
   }
+
+  onSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.props.appState.setSearchTerm(e.target.value);
+  };
+
+  onSearchKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      this.props.appState.searchForSites();
+    }
+  };
 
   get drawer() {
     const { classes } = this.props;
@@ -119,9 +129,11 @@ class Core extends React.Component<Props> {
           >
             <Input
               id="password"
-              value=""
+              value={appState.searchTerm}
+              placeholder="Enter site name"
               className={classes.searchInput}
-              // onChange={this.onChangePassword}
+              onChange={this.onSearch}
+              onKeyPress={this.onSearchKeyPress}
               endAdornment={
                 <InputAdornment position="end">
                   <SearchIcon />
@@ -140,12 +152,12 @@ class Core extends React.Component<Props> {
       {/* {this.drawer} */}
       <main className={classes.content}>
         <div className={classes.toolbar} />
-        <div className={classes.toolbar} />
         {children}
       </main>
-      {appState.loggedInAs && <Button variant="fab" className={classes.fab} color="primary">
-        <AddIcon />
-      </Button>}
+      {appState.loggedInAs &&
+        <ButtonLink href="/add" variant="fab" className={classes.fab} color="primary">
+          <AddIcon />
+        </ButtonLink>}
     </div>
   }
 }

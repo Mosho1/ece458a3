@@ -74,15 +74,19 @@ export class Add extends React.Component<Props, any> {
     };
   }
 
-  async addPassword() {
-    const res = await this.props.appState.apiRequest('passwords', {
+  async addSite() {
+    const { appState } = this.props;
+    const site_username = await appState.encrypt(this.mState.form.site_username);
+    const site_password = await appState.encrypt(this.mState.form.site_password);
+    const res = await appState.apiRequest('passwords', {
       method: 'POST',
       body: JSON.stringify({
         site: this.mState.form.site,
-        site_password: this.mState.form.site_password,
-        site_username: this.mState.form.site_username,
+        site_password,
+        site_username,
       })
     });
+
     this.resetForm();
   }
 
@@ -91,7 +95,7 @@ export class Add extends React.Component<Props, any> {
     const { context, appState } = this.props;
     try {
       this.mState.loading = true;
-      await this.addPassword();
+      await this.addSite();
     } finally {
       runInAction(() => this.mState.loading = false);
     }
@@ -118,7 +122,7 @@ export class Add extends React.Component<Props, any> {
             <Grid justify="center" container>
               <form onSubmit={this.onSubmit} className={classes.form}>
                 <Grid item xs={12}>
-                  <FormControl className={classes.formControl}>
+                  <FormControl required className={classes.formControl}>
                     <InputLabel htmlFor="username">Site</InputLabel>
                     <Input
                       id="username"
