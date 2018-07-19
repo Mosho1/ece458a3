@@ -1,6 +1,6 @@
 const crypto = require('asmcrypto.js');
 
-const getHash = (str, salt, count = 4096, dklen = 64) => {
+const getPbkdf2Hash = (str, salt, count = 4096, dklen = 64) => {
     return crypto.bytes_to_hex(
         crypto.Pbkdf2HmacSha512(
             crypto.string_to_bytes(str),
@@ -19,6 +19,6 @@ const generateToken = () =>
 
 
 module.exports = {
-    getHash,
+    getPbkdf2Hash,
     generateToken
 };

@@ -35,6 +35,8 @@ class App {
     }
 
     this.hookHistory();
+
+    this.appState.refreshToken();
   }
 
   @action setRoute = (component) => {
@@ -45,9 +47,11 @@ class App {
     const match = this.router.match(pathname);
     const params = match ? match.params : {};
     const route = match ? match.fn : defaultRoute;
-    const onEnter = route.onEnter || (() => Promise.resolve());
-    await onEnter.call(route, this.appState, params);
-    route.getComponent(this.appState, params).then(this.setRoute);
+    const onEnter = route.onEnter || (() => Promise.resolve(true));
+    const shouldLoad = await onEnter.call(route, this.appState, params);
+    if (shouldLoad) {
+      route.getComponent(this.appState, params).then(this.setRoute);
+    }
   }
 
   pushState: any;
@@ -55,8 +59,6 @@ class App {
   onpopstate: any;
 
   hookHistory() {
-    this.updateLocation();
-
     if (typeof history !== 'undefined') {
       this.pushState = history.pushState;
       history.pushState = (...args) => {
@@ -75,7 +77,10 @@ class App {
         this.onpopstate.apply(window, e);
         this.updateLocation();
       };
+      
     }
+
+    this.updateLocation();
   }
 
   unload() {

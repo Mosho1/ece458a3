@@ -20,7 +20,7 @@ export interface Route {
   // This is useful because routes typically need additional data loading logic _after_ they mount.
   // For example - a books component might require data after loading (and a loading indicator can be
   // shown in the meantime).
-  onEnter?: (appState: AppState, params: object) => void | Promise<void>;
+  onEnter?: (appState: AppState, params: object) => any | Promise<any>;
 }
 
 let routes: Route[];
@@ -37,25 +37,20 @@ export const defaultRoute: Route = {
 
 const authenticateRoute = async (appState: AppState, params) => {
   if (appState.loggedInAs === null) {
-    await appState.refreshToken();
-    if (appState.loggedInAs === null) {
-      appState.goTo('/login', true);
-    } else {
-      appState.goTo('/add');
-    }
+    appState.goTo('/login', true);
+    return false;
   }
+  return true;
 };
 
 routes = [{
   route: '/login',
-  onEnter: authenticateRoute,
   async getComponent(appState, params) {
     const Login = await getRoute(import('./components/Login'));
     return <Login context={'login'} appState={appState} />;
   }
 }, {
   route: '/register',
-  onEnter: authenticateRoute,
   async getComponent(appState, params) {
     const Login = await getRoute(import('./components/Login'));
     return <Login context={'register'} appState={appState} />;

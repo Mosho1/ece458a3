@@ -12,11 +12,17 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser')
 const mailer = require('./mailer');
 const { port } = require('./constants');
-const { generateToken, getHash } = require('./crypto');
+const { generateToken, getPbkdf2Hash } = require('./crypto');
 const { escape } = require('sqlstring');
 
 api.use(bodyParser.json());
 api.use(cookieParser());
+
+let cookieName = 'cookieName';
+
+(async () => {
+    cookieName = (await generateToken()).slice(0, 10);
+})();
 
 api.use((req, res, next) => {
     for (const field of ['body', 'cookies', 'query']) {
@@ -48,7 +54,7 @@ api.post('/register', async (req, res, next) => {
             VALUES (
                 ${body.username},
                 ${body.email},
-                "${getHash(body.password, salt)}",
+                "${getPbkdf2Hash(body.password, salt)}",
                 "${salt}",
                 "${token}",
                 0
@@ -99,6 +105,13 @@ api.get('/confirm', async (req, res, next) => {
     }
 });
 
+const setCookie = (res, value) => {
+    res.cookie(cookieName, value, {
+        httpOnly: true,
+        // secure: true
+    });
+};
+
 api.post('/login', async (req, res, next) => {
     try {
         const { body } = req;
@@ -113,7 +126,7 @@ api.post('/login', async (req, res, next) => {
             throw new Error('Could not authenticate user');
         }
 
-        const password = getHash(body.password, row.salt);
+        const password = getPbkdf2Hash(body.password, row.salt);
         if (password !== row.password) {
             throw new Error('Wrong password.');
         }
@@ -122,14 +135,11 @@ api.post('/login', async (req, res, next) => {
 
         await db.runAsync(`
             UPDATE users 
-                SET authToken = "${token}"
+                SET authToken = "${getPbkdf2Hash(token, cookieName)}"
             WHERE username = ${body.username}
         `);
 
-        res.cookie('auth', token, {
-            httpOnly: true,
-            // secure: true
-        });
+        setCookie(res, token);
         res.sendStatus(200);
     } catch (e) {
         console.error(e);
@@ -141,7 +151,7 @@ const getUser = async (authToken) => {
     const row = await db.getAsync(`
         SELECT *
         FROM users 
-        WHERE authToken = ${authToken}
+        WHERE authToken = ${getPbkdf2Hash(authToken, cookieName)}
     `);
 
     return row || null;
@@ -156,11 +166,11 @@ api.post('/refresh', async (req, res, next) => {
     try {
         const { body, cookies } = req;
 
-        if (!cookies.auth) {
+        if (!cookies[cookieName]) {
             return res.sendStatus(401);
         }
 
-        const user = await getUser(cookies.auth);
+        const user = await getUser(cookies[cookieName]);
 
         if (!user) {
             return res.sendStatus(401);
@@ -170,15 +180,11 @@ api.post('/refresh', async (req, res, next) => {
 
         await db.runAsync(`
             UPDATE users 
-                SET authToken = "${token}"
+                SET authToken = "${getPbkdf2Hash(token, cookieName)}"
             WHERE id = ${user.id}
         `);
 
-        res.cookie('auth', token, {
-            httpOnly: true,
-            maxAge: 86400
-            // secure: true
-        });
+        setCookie(res, token);
 
         res.send({
             username: user.username
@@ -194,10 +200,10 @@ api.post('/logout', async (req, res, next) => {
         await db.runAsync(`
             UPDATE users 
                 SET authToken = NULL
-            WHERE authToken = ${req.cookies.auth}
+            WHERE authToken = ${getPbkdf2Hash(req.cookies[cookieName], cookieName)}
         `);
 
-        res.clearCookie('auth');
+        res.clearCookie(cookieName);
         res.sendStatus(200);
     } catch (e) {
         console.error(e);
@@ -210,11 +216,11 @@ api.post('/passwords', async (req, res, next) => {
     try {
         const { body, cookies } = req;
 
-        if (!cookies.auth) {
+        if (!cookies[cookieName]) {
             return res.sendStatus(401);
         }
 
-        const userId = await getUserId(cookies.auth);
+        const userId = await getUserId(cookies[cookieName]);
 
         if (!userId) {
             return res.sendStatus(401);
@@ -240,7 +246,7 @@ api.post('/passwords', async (req, res, next) => {
 
 api.get('/passwords/search', async (req, res, next) => {
     try {
-        const userId = await getUserId(req.cookies.auth);
+        const userId = await getUserId(req.cookies[cookieName]);
 
         if (!userId) {
             return res.sendStatus(401);

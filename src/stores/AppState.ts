@@ -24,6 +24,8 @@ export class AppState {
     runInAction(() => {
       this.loggedInAs = user.username;
     });
+
+    this.goTo('/add');
   }
 
   goTo = (url: string, replace = false) =>
