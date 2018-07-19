@@ -14,18 +14,21 @@ export class AppState {
   @observable add: Add = null;
   @observable loggedInAs: string | null = null;
 
+
   async refreshToken() {
-    const res = await this.apiRequest('refresh', {
-      method: 'POST'
-    });
+    try {
+      const res = await this.apiRequest('refresh', {
+        method: 'POST'
+      });
 
-    const user = await res.json();
+      const user = await res.json();
 
-    runInAction(() => {
-      this.loggedInAs = user.username;
-    });
-
-    this.goTo('/add');
+      runInAction(() => {
+        this.loggedInAs = user.username;
+      });
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   goTo = (url: string, replace = false) =>
@@ -55,6 +58,7 @@ export class AppState {
       this.login = store.login;
       this.search = store.search;
       this.add = store.add;
+      this.loggedInAs = store.loggedInAs;
     }
     return this;
   }

@@ -35,36 +35,48 @@ export const defaultRoute: Route = {
   }
 };
 
-const authenticateRoute = async (appState: AppState, params) => {
+const authenticateRoute = (redirectToLogin = true) => async (appState: AppState, params) => {
   if (appState.loggedInAs === null) {
-    appState.goTo('/login', true);
-    return false;
+    await appState.refreshToken();
+    if (appState.loggedInAs === null) {
+      if (redirectToLogin) {
+        appState.goTo('/login');
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      appState.goTo('/add');
+      return false;
+    }
   }
   return true;
 };
 
 routes = [{
   route: '/login',
+  onEnter: authenticateRoute(false),
   async getComponent(appState, params) {
     const Login = await getRoute(import('./components/Login'));
     return <Login context={'login'} appState={appState} />;
   }
 }, {
   route: '/register',
+  onEnter: authenticateRoute(false),
   async getComponent(appState, params) {
     const Login = await getRoute(import('./components/Login'));
     return <Login context={'register'} appState={appState} />;
   }
 }, {
   route: '/add',
-  onEnter: authenticateRoute,
+  onEnter: authenticateRoute(),
   async getComponent(appState, params) {
     const Add = await getRoute(import('./components/Add'));
     return <Add appState={appState} />;
   }
 }, {
   route: '/search',
-  onEnter: authenticateRoute,
+  onEnter: authenticateRoute(),
   async getComponent(appState, params) {
     const Search = await getRoute(import('./components/Search'));
     return <Search appState={appState} />;

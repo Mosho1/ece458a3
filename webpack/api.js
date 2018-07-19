@@ -25,7 +25,7 @@ let cookieName = 'cookieName';
 })();
 
 api.use((req, res, next) => {
-    for (const field of ['body', 'cookies', 'query']) {
+    for (const field of ['body', 'query']) {
         for (let k in req[field]) {
             req[field][k] = escape(req[field][k]);
         }
@@ -108,6 +108,7 @@ api.get('/confirm', async (req, res, next) => {
 const setCookie = (res, value) => {
     res.cookie(cookieName, value, {
         httpOnly: true,
+        maxAge: 60 * 60 * 1000,
         // secure: true
     });
 };
@@ -151,7 +152,7 @@ const getUser = async (authToken) => {
     const row = await db.getAsync(`
         SELECT *
         FROM users 
-        WHERE authToken = ${getPbkdf2Hash(authToken, cookieName)}
+        WHERE authToken = "${getPbkdf2Hash(authToken, cookieName)}"
     `);
 
     return row || null;
@@ -200,7 +201,7 @@ api.post('/logout', async (req, res, next) => {
         await db.runAsync(`
             UPDATE users 
                 SET authToken = NULL
-            WHERE authToken = ${getPbkdf2Hash(req.cookies[cookieName], cookieName)}
+            WHERE authToken = "${getPbkdf2Hash(req.cookies[cookieName], cookieName)}"
         `);
 
         res.clearCookie(cookieName);
