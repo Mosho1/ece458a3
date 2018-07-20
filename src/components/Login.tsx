@@ -115,7 +115,7 @@ export class Login extends React.Component<Props, any> {
             <Grid justify="center" container>
               <form onSubmit={this.onSubmit} className={classes.form}>
                 <Grid item xs={12}>
-                  <FormControl className={classes.formControl}>
+                  <FormControl required className={classes.formControl}>
                     <InputLabel htmlFor="username">Name</InputLabel>
                     <Input
                       id="username"
@@ -124,19 +124,21 @@ export class Login extends React.Component<Props, any> {
                   </FormControl>
                 </Grid>
                 {context === 'register' && <Grid item xs={12}>
-                  <FormControl className={classes.formControl}>
+                  <FormControl required className={classes.formControl}>
                     <InputLabel htmlFor="email">Email</InputLabel>
                     <Input
+                      type="email"
                       id="email"
                       value={this.mState.form.email}
                       onChange={this.onChangeEmail} />
                   </FormControl>
                 </Grid>}
                 <Grid item xs={12}>
-                  <FormControl className={classes.formControl}>
+                  <FormControl required className={classes.formControl}>
                     <InputLabel htmlFor="password">Password</InputLabel>
                     <Input
                       id="password"
+                      type="password"
                       value={this.mState.form.password}
                       onChange={this.onChangePassword} />
                   </FormControl>
