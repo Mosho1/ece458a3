@@ -40,7 +40,10 @@ export class Confirm extends React.Component<Props, any> {
         size={24}
         className={classes.loading}
       />
-      case 'success': return <Typography>Your account has been activated!</Typography>
+      case 'success': return [
+        <Typography key="0" gutterBottom>Your account has been activated!</Typography>,
+        <Typography key="1">Click <Link href="/login">here</Link> to log in.</Typography>
+      ]
       case 'failure': return <Typography>Could not activate your account</Typography>
     }
   }
