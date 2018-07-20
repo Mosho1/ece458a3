@@ -53,6 +53,7 @@ module.exports = (env) => {
         },
         {
           test: /\.(css)$/,
+          exclude: /node_modules/,
           use:
             [
               env.dev || env.test ? 'style-loader' : MiniCssExtractPlugin.loader,
@@ -62,6 +63,7 @@ module.exports = (env) => {
         },
         {
           test: /\.(png|jpg)$/,
+          exclude: /node_modules/,
           use: 'url-loader?limit=8192'
         }
       ],
