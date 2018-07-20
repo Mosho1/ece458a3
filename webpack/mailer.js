@@ -6,7 +6,7 @@ const smtpConfig = {
     port: 587,
     secure: false,
     auth: {
-        user: 'sharonrolel2@gmail.com',
+        user: process.env['EMAIL_ACCOUNT'],
         pass: process.env['EMAIL_PASSWORD']
     }
 };

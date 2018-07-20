@@ -4,6 +4,7 @@
   "description": "A react boilerplate project featuring webpack 2, HMR, code splitting, mobx, SSR",
   "main": "index.js",
   "scripts": {
+    "serve": "node index",
     "start": "cross-env NODE_ENV=development node webpack/webpack-dev-server --env.dev",
     "build": "rm -Rf build/* && npm run build-browser && npm run build-node",
     "build-browser": "cross-env NODE_ENV=production webpack --config webpack/webpack.config.js --progress --env.prod",
