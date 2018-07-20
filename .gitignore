@@ -1,8 +1,7 @@
-launch.json
+
 logs
 *.log
 node_modules
 build
 /.vscode/*
-!/.vscode/launch.json
 *.sqlite3
