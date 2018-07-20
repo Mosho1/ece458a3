@@ -49,8 +49,10 @@ const callbackWithError = (res, cb) => function (err) {
 api.post('/register', async (req, res, next) => {
     try {
         const { body } = req;
+
         const token = await generateToken();
         const salt = await generateToken();
+
         await db.runAsync(`
             INSERT INTO users (username, email, password, salt, activationToken, active) 
             VALUES (
@@ -63,7 +65,7 @@ api.post('/register', async (req, res, next) => {
             );
         `);
         const hostname = `${req.protocol}://${req.hostname}:${port}`;
-        const confirmationUrl = `${hostname}/api/confirm?token=${token}`;
+        const confirmationUrl = `${hostname}/confirm?token=${token}`;
         await mailer.sendConfirmationEmail(body.email.replace(/^'|'$/g, ''), confirmationUrl);
         res.sendStatus(200);
     } catch (e) {
@@ -121,6 +123,7 @@ const setCookie = (res, value) => {
     res.cookie(cookieName, value, {
         httpOnly: true,
         maxAge: 60 * 60 * 1000,
+        sameSite: true
         // secure: true
     });
 };
@@ -130,12 +133,12 @@ api.post('/login', async (req, res, next) => {
         const { body } = req;
 
         const row = await db.getAsync(`
-            SELECT salt, password 
+            SELECT salt, password, active 
             FROM users 
             WHERE username = ${body.username}
         `);
 
-        if (!row) {
+        if (!row || !row.active) {
             throw new Error('Could not authenticate user');
         }
 
@@ -161,13 +164,18 @@ api.post('/login', async (req, res, next) => {
 });
 
 const getUser = async (authToken) => {
-    const row = await db.getAsync(`
+    try {
+        const row = await db.getAsync(`
         SELECT *
         FROM users 
         WHERE authToken = "${getPbkdf2Hash(authToken, cookieSalt)}"
     `);
-
-    return row || null;
+        if (!row || !row.active) return null;
+        return row;
+    } catch (e) {
+        console.error(e);
+        return null
+    }
 };
 
 const getUserId = async (authToken) => {

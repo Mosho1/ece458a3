@@ -112,7 +112,10 @@ const styles = (theme: Theme) => createStyles({
   table: {
     position: 'relative',
     minWidth: 700,
-    minHeight: 150
+    minHeight: 150,
+  },
+  cell: {
+    width: '33%'
   },
   loading: {
     color: green[500],
@@ -187,9 +190,9 @@ export class Search extends React.Component<Props, any> {
             <Table className={classes.table}>
               <TableHead>
                 <TableRow>
-                  <TableCell>Site</TableCell>
-                  <TableCell>Username</TableCell>
-                  <TableCell>Password</TableCell>
+                  <TableCell className={classes.cell}>Site</TableCell>
+                  <TableCell className={classes.cell}>Username</TableCell>
+                  <TableCell className={classes.cell}>Password</TableCell>
                 </TableRow>
               </TableHead>
               {this.tableBody}

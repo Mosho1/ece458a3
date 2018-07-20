@@ -44,11 +44,11 @@ export class Login extends React.Component<Props, any> {
 
   constructor(props: Props) {
     super(props);
-    if (props.appState.login) {
-      this.mState = props.appState.login.mState;
+    if (props.appState.loginPage) {
+      this.mState = props.appState.loginPage.mState;
     }
     runInAction(() => {
-      props.appState.login = this;
+      props.appState.loginPage = this;
     });
   }
 
@@ -75,46 +75,21 @@ export class Login extends React.Component<Props, any> {
     };
   }
 
-  async login() {
-    const {appState} = this.props;
-    const {username, password} = this.mState.form;
-    const res = await appState.apiRequest('login', {
-      method: 'POST',
-      body: JSON.stringify({
-        username,
-        password,
-      })
-    });
-    runInAction(() => {
-      appState.loggedInAs = username;
-      appState.masterKey = password;
-    });
-    appState.goTo('/add');
-    this.resetForm();
-  }
-
-  async register() {
-    await this.props.appState.apiRequest('register', {
-      method: 'POST',
-      body: JSON.stringify({
-        username: this.mState.form.username,
-        email: this.mState.form.email,
-        password: this.mState.form.password,
-      })
-    });
-    this.resetForm();
-  }
-
   onSubmit = action(async (e: any) => {
     e.preventDefault();
     const { context, appState } = this.props;
     try {
       this.mState.loading = true;
       switch (context) {
-        case 'login': await this.login(); break;
-        case 'register': await this.register(); break;
+        case 'login':
+          await appState.login(this.mState.form);
+          break;
+        case 'register':
+          await appState.register(this.mState.form);
+          break;
       }
     } finally {
+      this.resetForm();
       runInAction(() => this.mState.loading = false);
     }
   })

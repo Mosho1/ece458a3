@@ -13,7 +13,8 @@ const hasWindow = typeof window !== 'undefined';
 // need to edit this code yourself at all.
 class App {
   // the main element we're rendering, this reacts to route changes (MobX).
-  @observable route: React.ReactElement<any> = null;
+  @observable routeComponent: React.ReactElement<any> | null = null;
+  @observable route: string | null = null;
   // our main app state, this is available in your router
   @observable appState: AppState;
   // our router
@@ -35,22 +36,23 @@ class App {
     }
 
     this.hookHistory();
-
-    this.appState.refreshToken();
   }
 
-  @action setRoute = (component) => {
-    this.route = component;
+  @action setRouteComponent = (component) => {
+    this.routeComponent = component;
   }
 
   async updateLocation(pathname = hasWindow ? location.pathname : '/') {
     const match = this.router.match(pathname);
     const params = match ? match.params : {};
     const route = match ? match.fn : defaultRoute;
-    const onEnter = route.onEnter || (() => Promise.resolve(true));
-    const shouldLoad = await onEnter.call(route, this.appState, params);
-    if (shouldLoad) {
-      route.getComponent(this.appState, params).then(this.setRoute);
+    if (route.route !== this.route) {
+      this.route = route.route;
+      const onEnter = route.onEnter || (() => Promise.resolve(true));
+      const shouldLoad = await onEnter.call(route, this.appState, params);
+      if (shouldLoad !== false) {
+        route.getComponent(this.appState, params).then(this.setRouteComponent);
+      }
     }
   }
 
@@ -77,7 +79,7 @@ class App {
         this.onpopstate.apply(window, e);
         this.updateLocation();
       };
-      
+
     }
 
     this.updateLocation();

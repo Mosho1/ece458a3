@@ -69,17 +69,6 @@ interface Props extends WithStyles<typeof styles> {
 @observer
 class Core extends React.Component<Props> {
 
-  logout = async () => {
-    const { appState } = this.props;
-    await appState.apiRequest('logout', {
-      method: 'POST',
-    });
-    runInAction(() => {
-      appState.resetState();
-    });
-    appState.goTo('/login');
-  }
-
   onSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.props.appState.setSearchTerm(e.target.value);
   };
@@ -142,7 +131,7 @@ class Core extends React.Component<Props> {
             />
           </FormControl>}
           {appState.loggedInAs
-            ? <Button onClick={this.logout} color="inherit">Logout</Button>
+            ? <Button onClick={appState.logout} color="inherit">Logout</Button>
             : [
               <ButtonLink key="0" href="/login" color="inherit">Login</ButtonLink>,
               <ButtonLink key="1" href="/register" color="inherit">Register</ButtonLink>,

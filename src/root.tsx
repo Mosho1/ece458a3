@@ -12,11 +12,11 @@ interface Props { app: App }
 class Root extends React.Component<Props, {}> {
 
   render() {
-    const { route, appState } = this.props.app;
+    const { routeComponent, appState } = this.props.app;
     return (
       <div>
         <CssBaseline />
-        <Core appState={appState} children={route} />
+        <Core appState={appState} children={routeComponent} />
       </div>
     );
   }

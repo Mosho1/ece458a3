@@ -19,7 +19,7 @@ export interface Site {
 * This is the entry point for the app's state. All stores should go here.
 */
 export class AppState {
-  @observable login: Login = null;
+  @observable loginPage: Login = null;
   @observable search: Search = null;
   @observable add: Add = null;
   @observable loggedInAs: string | null = null;
@@ -43,6 +43,12 @@ export class AppState {
 
   @computed get decrypt() {
     return decrypt(this.masterKey);
+  }
+
+  @action
+  onUnauthorized() {
+    this.resetState();
+    this.goTo('/login');
   }
 
   async searchForSites() {
@@ -88,11 +94,67 @@ export class AppState {
       ...init,
     });
 
+    if (res.status === 401) {
+      this.onUnauthorized();
+    }
+
     if (res.status !== 200) {
       throw new Error(res.statusText);
     }
 
     return res;
+  }
+
+  async login(form: { username: string, password: string }) {
+    const { username, password } = form;
+    const res = await this.apiRequest('login', {
+      method: 'POST',
+      body: JSON.stringify({
+        username,
+        password,
+      })
+    });
+    runInAction(() => {
+      this.loggedInAs = username;
+      this.masterKey = password;
+    });
+    this.goTo('/add');
+  }
+
+  async register(form: { username: string, email: string, password: string }) {
+    await this.apiRequest('register', {
+      method: 'POST',
+      body: JSON.stringify({
+        username: form.username,
+        email: form.email,
+        password: form.password,
+      })
+    });
+  }
+  @observable confirmAccountStatus: 'start' | 'success' | 'failure' = 'start';
+
+  async confirmAccount() {
+    this.confirmAccountStatus = 'start';
+    try {
+      const params = new URLSearchParams(location.search.slice(1));
+      const token = params.get('token');
+      if (!token) throw new Error('could not confirm account');
+      await this.apiRequest(`confirm?token=${token}`);
+      this.confirmAccountStatus = 'success';
+    } catch (e) {
+      console.error(e);
+      this.confirmAccountStatus = 'failure';
+    }
+  }
+
+  logout = async () => {
+    try {
+      await this.apiRequest('logout', {
+        method: 'POST',
+      });
+    } finally {
+      this.onUnauthorized();
+    }
   }
 
   @action

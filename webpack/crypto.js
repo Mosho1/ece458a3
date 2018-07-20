@@ -11,8 +11,8 @@ const getPbkdf2Hash = (str, salt, count = 4096, dklen = 64) => {
     );
 };
 
-const generateToken = () =>
-    new Promise((resolve, reject) => require('crypto').randomBytes(24, function (err, buffer) {
+const generateToken = (length = 24) =>
+    new Promise((resolve, reject) => require('crypto').randomBytes(length, function (err, buffer) {
         if (err) reject(err)
         else resolve(buffer.toString('hex'));
     }));
