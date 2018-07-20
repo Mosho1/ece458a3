@@ -11,7 +11,7 @@ const path = require('path');
 const webpackConfig = require('./webpack.config');
 const opn = require('opn');
 const api = require('./api');
-const {port} = require('./constants');
+const port = require('./constants').devPort;
 /**
  * Always dev enviroment when running webpack dev server
  * There are other ways to do this, so feel free to do
