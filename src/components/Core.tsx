@@ -32,7 +32,9 @@ const styles = (theme: Theme) => createStyles({
     position: 'relative',
     width: drawerWidth,
   },
-  toolbar: theme.mixins.toolbar,
+  toolbar: {
+    height: 100,
+  },
   content: {
     flexGrow: 1,
     backgroundColor: theme.palette.background.default,
