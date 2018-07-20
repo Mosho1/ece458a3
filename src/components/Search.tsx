@@ -135,16 +135,6 @@ interface Props extends WithStyles<typeof styles> {
 @observer
 export class Search extends React.Component<Props, any> {
 
-  constructor(props: Props) {
-    super(props);
-    if (props.appState.search) {
-      this.mState = props.appState.search.mState;
-    }
-    runInAction(() => {
-      props.appState.search = this;
-    });
-  }
-
   get tableBody() {
     const { classes, appState } = this.props;
     const { searchResults } = appState;
