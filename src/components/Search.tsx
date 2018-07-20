@@ -75,9 +75,6 @@ class SearchRowBase extends React.Component<RowProps> {
         </IconButton>
 
         <Tooltip
-          PopperProps={{
-            disablePortal: true,
-          }}
           classes={{
             tooltip: classes.tooltip,
           }}
