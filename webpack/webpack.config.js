@@ -14,6 +14,7 @@ module.exports = (env) => {
   return {
     devtool: ifDev('source-map'),
     mode,
+    stats: false,
     entry: {
       app: removeEmpty([
         ifDev(`webpack-hot-middleware/client?http://localhost:${env.port}`),
