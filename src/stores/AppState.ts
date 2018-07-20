@@ -4,10 +4,6 @@ import { Search } from '../components/Search';
 import { Add } from '../components/Add';
 import { encrypt, decrypt } from '../../webpack/crypto';
 
-
-window['encrypt'] = encrypt;
-window['decrypt'] = decrypt;
-
 export interface Site {
   id: number,
   site: string;
