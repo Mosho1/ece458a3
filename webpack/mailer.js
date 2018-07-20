@@ -7,7 +7,7 @@ const smtpConfig = {
     secure: false,
     auth: {
         user: 'sharonrolel2@gmail.com',
-        pass: 'roflol1234'
+        pass: process.env['EMAIL_PASSWORD']
     }
 };
 
