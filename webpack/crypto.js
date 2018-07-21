@@ -1,10 +1,11 @@
-const crypto = require('asmcrypto.js');
+const asmcrypto = require('asmcrypto.js');
+const crypto = require('crypto');
 
 const getPbkdf2Hash = (str, salt, count = 4096, dklen = 64) => {
-    return crypto.bytes_to_hex(
-        crypto.Pbkdf2HmacSha512(
-            crypto.string_to_bytes(str),
-            crypto.string_to_bytes(salt),
+    return asmcrypto.bytes_to_hex(
+        asmcrypto.Pbkdf2HmacSha512(
+            asmcrypto.string_to_bytes(str),
+            asmcrypto.string_to_bytes(salt),
             count,
             dklen
         )
@@ -12,7 +13,7 @@ const getPbkdf2Hash = (str, salt, count = 4096, dklen = 64) => {
 };
 
 const generateToken = (length = 24) =>
-    new Promise((resolve, reject) => require('crypto').randomBytes(length, function (err, buffer) {
+    new Promise((resolve, reject) => crypto.randomBytes(length, function (err, buffer) {
         if (err) reject(err)
         else resolve(buffer.toString('hex'));
     }));
@@ -22,22 +23,22 @@ const encrypt = key => async clearText => {
     await new Promise(res => setTimeout(res));
     key = getPbkdf2Hash(key, key, 1, 16);
     const nonce = await generateToken(8);
-    const encrypted = crypto.AES_GCM.encrypt(
-        crypto.string_to_bytes(clearText),
-        crypto.string_to_bytes(key),
-        crypto.hex_to_bytes(nonce)
+    const encrypted = asmcrypto.AES_GCM.encrypt(
+        asmcrypto.string_to_bytes(clearText),
+        asmcrypto.string_to_bytes(key),
+        asmcrypto.hex_to_bytes(nonce)
     );
-    return nonce + crypto.bytes_to_hex(encrypted);
+    return nonce + asmcrypto.bytes_to_hex(encrypted);
 };
 
 const decrypt = key => value => {
     key = getPbkdf2Hash(key, key, 1, 16);
     const nonce = value.slice(0, 16);
     const cipherText = value.slice(16);
-    return crypto.bytes_to_string(crypto.AES_GCM.decrypt(
-        crypto.hex_to_bytes(cipherText),
-        crypto.string_to_bytes(key),
-        crypto.hex_to_bytes(nonce),
+    return asmcrypto.bytes_to_string(asmcrypto.AES_GCM.decrypt(
+        asmcrypto.hex_to_bytes(cipherText),
+        asmcrypto.string_to_bytes(key),
+        asmcrypto.hex_to_bytes(nonce),
     ));
 };
 

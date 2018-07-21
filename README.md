@@ -15,6 +15,20 @@ I realize this may be beyond the planned scope of the assignment, however I enjo
 
 Defensive measures taken according to OWASP.
 
+## Randomness
+
+All random tokens are generating using:
+
+```typescript
+const generateToken = (length = 24) =>
+    new Promise((resolve, reject) => crypto.randomBytes(length, function (err, buffer) {
+        if (err) reject(err)
+        else resolve(buffer.toString('hex'));
+    }));
+```
+
+Specifically `require('crypto').randomBytes`, which is a native NodeJS implementation of crypto algorithms, and randomness relies on system entropy using `/dev/urandom`. The app includes the (semi-official) browser implementation of this library from encryption, but without access to the system on users' machines, I don't know how close the randomness is to the Node implementation. It is, however, as close as possible.
+
 ## Session management
 
 Secure, HttpOnly, SameSite and MaxAge (1 hour) are used for the cookie. Domain value is set to the hostname including subdomain by default.
