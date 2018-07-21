@@ -15,13 +15,11 @@ export interface Site {
 /*
 * This is the entry point for the app's state. All stores should go here.
 */
-
-let masterKey: string;
-
 export class AppState {
 
   @observable state = {
     loggedInAs: null as string | null,
+    masterKey: null as string | null,
     searchTerm: '',
     searchResults: null as Site[] | null,
   }
@@ -29,6 +27,7 @@ export class AppState {
   @action
   resetState() {
     this.state.loggedInAs = null;
+    this.state.masterKey = null;
     this.state.searchResults = null;
     this.state.searchTerm = '';
   }
@@ -37,12 +36,12 @@ export class AppState {
     this.state.searchTerm = value;
   }
 
-  get encrypt() {
-    return encrypt(masterKey);
+  @computed get encrypt() {
+    return encrypt(this.state.masterKey);
   }
 
-  get decrypt() {
-    return decrypt(masterKey);
+  @computed get decrypt() {
+    return decrypt(this.state.masterKey);
   }
 
   onUnauthorized() {
@@ -124,7 +123,7 @@ export class AppState {
     });
     runInAction(() => {
       this.state.loggedInAs = username;
-      masterKey = password;
+      this.state.masterKey = password;
     });
     this.goTo('/add');
   }
