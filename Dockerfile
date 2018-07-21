@@ -10,9 +10,9 @@ COPY . .
 
 RUN npm run build-browser
 
-RUN chmod 666 db.sqlite3
-
 RUN useradd app
+RUN chown app db.sqlite3
+
 USER app
 
 EXPOSE 3001
