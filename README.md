@@ -12,9 +12,11 @@ I realize this may be beyond the planned scope of the assignment, however I enjo
 
 # List of defenses
 
+Defensive measured taken according to OWASP.
+
 ## Session management
 
-Secure, HttpOnly, SameSite and MaxAge (1 hour) are used. Domain value is set to the hostname including subdomain by default.
+Secure, HttpOnly, SameSite and MaxAge (1 hour) are used for the cookie. Domain value is set to the hostname including subdomain by default.
 
 TLS is used for all communication, with a 301 redirect from http to https.
 
