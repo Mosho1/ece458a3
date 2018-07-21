@@ -16,6 +16,7 @@ RUN node webpack/db.js
 
 RUN groupadd app
 RUN useradd -g app app
+RUN chmod 666 db.sqlite3
 RUN chown app:app db.sqlite3
 
 USER app
