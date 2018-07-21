@@ -10,7 +10,7 @@ COPY . .
 
 RUN npm run build-browser
 
-RUN useradd app:app
+RUN useradd -G app app
 RUN chown app:app db.sqlite3
 
 USER app
