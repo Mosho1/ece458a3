@@ -317,7 +317,11 @@ The view is available in `Add.tsx`.
 
 ### Search site (Retrieve password)
 
-The search bar occupies most of the top bar, hard to miss.
+The search bar occupies most of the top bar, hard to miss. Upon entering a term and pressing enter, the user will be directed to a page with a table that will list all matches. 
+
+There are 3 columns (site name, username, password), and the password is not visible unless the "show" button is clicked. There is also a button that allows a user to copy the password to their clipboard.
+
+This deviates a little from the specification, but I think allowing users to enter multiple users for a single site is desirable (I often do).
 
 #### Database Query
 
