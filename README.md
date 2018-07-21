@@ -20,6 +20,7 @@ Defensive measures taken according to OWASP.
 All random tokens are generated using:
 
 ```typescript
+// from webpack/crypto.js
 const generateToken = (length = 24) =>
     new Promise((resolve, reject) => crypto.randomBytes(length, function (err, buffer) {
         if (err) reject(err)
@@ -40,6 +41,7 @@ The session cookie name is random, and only a hash of the cookie is saved in the
 Cookies are set using:
 
 ```typescript
+// from webpack/api.js
 const setCookie = (res, value) => {
     res.cookie(cookieName, value, {
         httpOnly: true,
@@ -65,6 +67,7 @@ A CSRF synchronization token is used, in addition to the SameSite flag for the c
 Implemented with:
 
 ```typescript
+// from webpack/api.js
 const logUserOut = async (req, res) => {
     await db.prepare(`
         UPDATE users 
@@ -88,6 +91,7 @@ const CSRFProtection = async (req, res) => {
 All url params and GET request bodies are escaped using:
 
 ```typescript
+// from webpack/api.js
 for (const field of ['body', 'query']) {
     for (let k in req[field]) {
         req[field][k] = unquote(escape(req[field][k]));
@@ -102,7 +106,7 @@ All database queries are built using `db.prepare`.
 Usernames and passwords are hashed using PBKDF2 - slower than SHA by design to increase work that needs to be done by an attacker, while having no real consequence for the user (who only has to do it once).
 
 ```typescript
-// from crypto.js
+// from webpack/crypto.js
 const getPbkdf2Hash = (str, salt, count = 4096, dklen = 64) => {
     return crypto.bytes_to_hex(
         crypto.Pbkdf2HmacSha512(
@@ -120,7 +124,7 @@ const getPbkdf2Hash = (str, salt, count = 4096, dklen = 64) => {
 AES-GCM is used on the client-side to encrypt site usernames and passwords. A random nonce is used. Only the encrypted values are ever transmitted to the server.
 
 ```typescript
-// from crypto.js
+// from webpack/crypto.js
 
 const encrypt = key => async clearText => {
     // delay invocations, for some reason it makes the result invalid
@@ -201,6 +205,7 @@ The following technologies were used:
 ### Schema
 
 ```typescript
+// from webpack/db.js
 db.run(`
     CREATE TABLE users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -228,9 +233,9 @@ db.run(`
 
 ## Features
 
-1. `api.js` includes all the backend endpoints. A 401 status is sent back to the client if an unauthorized attempt to access an endpoint occurs, and a 400 status is sent if anything else went wrong. All endpoints accept only POST requests.
+1. `webpack/api.js` includes all the backend endpoints. A 401 status is sent back to the client if an unauthorized attempt to access an endpoint occurs, and a 400 status is sent if anything else went wrong. All endpoints accept only POST requests.
 
-1. `AppState.ts` includes all calls to those endpoints from the frontend.
+1. `stores/AppState.ts` includes all calls to those endpoints from the frontend.
 
 1. `Components/*.tsx` includes the view files for each page. Most of the components are forms and use `Form.tsx` which implements a submit button with a loader, as well as success error messages. The view React templates are quite verbose so I won't include them in the report, but they are in the attached code for the app (in each view component class' `render` method, in addition to all other view functionalities). In addition to the success/error messages and loader, I tried to make for a nice UX, with a Material-UI layout, colors, fonts and animations.
 
@@ -241,6 +246,7 @@ In addition to the username, password and email, the user also needs to enter th
 #### Database Query
 
 ```typescript
+// from webpack/api.js
 db.prepare(`
     INSERT INTO users (username, email, password, salt, activationToken, active) 
     VALUES (?, ?, ?, ?, ?, 0);
@@ -262,6 +268,7 @@ After registration, a token is generated and an email is sent to the user with a
 #### Database Query
 
 ```typescript
+// from webpack/api.js
 db.prepare(`
     UPDATE users 
         SET active = 1, activationToken = NULL 
@@ -276,7 +283,8 @@ The view is available in `Confirm.tsx`.
 The user's password and active status is verified with this query:
 
 ```typescript
-const row = await db.prepare(`
+// from webpack/api.js
+db.prepare(`
     SELECT salt, password, active 
     FROM users 
     WHERE username = ?
@@ -286,7 +294,8 @@ const row = await db.prepare(`
 And then the auth token is issued and set as a cookie.
 
 ```typescript
-await db.prepare(`
+// from webpack/api.js
+db.prepare(`
     UPDATE users 
     SET authToken = ?
     WHERE username = ?
@@ -300,6 +309,7 @@ The view is available in `Login.tsx`.
 A random hex token with an expiry date (default 1 hour) is generated using:
 
 ```typescript
+// from webpack/crypto.js
 const generateTokenWithExpiry = async (expiryInMs = 1000 * 60 * 60, length = 24) => {
     return (Number(new Date()) + expiryInMs) + await generateToken();
 };
@@ -319,6 +329,8 @@ This page is accessed using the round `+` on the bottom right, and the user is a
 
 #### Database Query
 
+```typescript
+// from webpack/api,.js
 await db.prepare(`
     INSERT INTO passwords (site, site_username, site_password, user_id)
     VALUES (?, ?, ?, ?)
@@ -328,6 +340,7 @@ await db.prepare(`
     body.site_password,
     userId
 );
+```
 
 The view is available in `Add.tsx`.
 
@@ -346,6 +359,7 @@ That is, having the user input the password on every decryption.
 #### Database Query
 
 ```typescript
+// from webpack/api.js
 const rows = await db.prepare(`
     SELECT 
         id,
