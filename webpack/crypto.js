@@ -18,6 +18,7 @@ const generateToken = (length = 24) =>
     }));
 
 const encrypt = key => async clearText => {
+    // delay invocations, for some reason it makes the result invalid
     await new Promise(res => setTimeout(res));
     key = getPbkdf2Hash(key, key, 1, 16);
     const nonce = await generateToken(8);
