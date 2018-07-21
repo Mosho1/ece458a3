@@ -25,7 +25,7 @@ The session cookie name is random, and only a hash of the cookie is saved in the
 
 Cookies are set using:
 
-```
+```typescript
 const setCookie = (res, value) => {
     res.cookie(cookieName, value, {
         httpOnly: true,
@@ -50,7 +50,7 @@ A CSRF synchronization token is used, in addition to the SameSite flag for the c
 
 Implemented with:
 
-```
+```typescript
 const logUserOut = async (req, res) => {
     await db.prepare(`
         UPDATE users 
@@ -71,7 +71,15 @@ const CSRFProtection = async (req, res) => {
 
 ## SQL injection
 
-All url params and GET request bodies are escaped.
+All url params and GET request bodies are escaped using:
+
+```typescript
+for (const field of ['body', 'query']) {
+    for (let k in req[field]) {
+        req[field][k] = unquote(escape(req[field][k]));
+    }
+}
+```
 
 All database queries are built using `db.prepare`.
 
@@ -79,7 +87,7 @@ All database queries are built using `db.prepare`.
 
 Usernames and passwords are hashed using PBKDF2 - slower than SHA by design to increase work that needs to be done by an attacker, while having no real consequence for the user (who only has to do it once).
 
-```
+```typescript
 // from crypto.js
 const getPbkdf2Hash = (str, salt, count = 4096, dklen = 64) => {
     return crypto.bytes_to_hex(
@@ -97,7 +105,7 @@ const getPbkdf2Hash = (str, salt, count = 4096, dklen = 64) => {
 
 AES-GCM is used on the client-side to encrypt site usernames and passwords. A random nonce is used. Only the encrypted values are ever transmitted to the server.
 
-```
+```typescript
 // from crypto.js
 
 const encrypt = key => async clearText => {
@@ -176,7 +184,7 @@ The following technologies were used:
 
 ### Schema
 
-```
+```typescript
 db.run(`
     CREATE TABLE users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -216,7 +224,7 @@ In addition to the username, password and email, the user also needs to enter th
 
 #### Database Query
 
-```
+```typescript
 db.prepare(`
     INSERT INTO users (username, email, password, salt, activationToken, active) 
     VALUES (?, ?, ?, ?, ?, 0);
@@ -237,7 +245,7 @@ After registration, a token is generated and an email is sent to the user with a
 
 #### Database Query
 
-```
+```typescript
 db.prepare(`
     UPDATE users 
         SET active = 1, activationToken = NULL 
@@ -251,7 +259,7 @@ The view is available in `Confirm.tsx`.
 
 The user's password and active status is verified with this query:
 
-```
+```typescript
 const row = await db.prepare(`
     SELECT salt, password, active 
     FROM users 
@@ -261,7 +269,7 @@ const row = await db.prepare(`
 
 And then the auth token is issued and set as a cookie.
 
-```
+```typescript
 await db.prepare(`
     UPDATE users 
     SET authToken = ?
@@ -275,7 +283,7 @@ The view is available in `Login.tsx`.
 
 A random hex token with an expiry date (default 1 hour) is generated using:
 
-```
+```typescript
 const generateTokenWithExpiry = async (expiryInMs = 1000 * 60 * 60, length = 24) => {
     return (Number(new Date()) + expiryInMs) + await generateToken();
 };
@@ -313,7 +321,7 @@ The search bar occupies most of the top bar, hard to miss.
 
 #### Database Query
 
-```
+```typescript
 const rows = await db.prepare(`
     SELECT 
         id,
