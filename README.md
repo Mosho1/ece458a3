@@ -323,7 +323,11 @@ The search bar occupies most of the top bar, hard to miss. Upon entering a term 
 
 There are 3 columns (site name, username, password), and the password is not visible unless the "show" button is clicked. There is also a button that allows a user to copy the password to their clipboard.
 
-This deviates a little from the specification, but I think allowing users to enter multiple users for a single site is desirable (I often do).
+This deviates a little from the specification, but I think allowing users to enter multiple users for a single site is desirable (I often do). The only attack vector (that I could think of or research) is access to the browser developer tools, and also browser itself since there is no way (again, that I could think of or find through research) to invoke any functions in the app's code from the console. 
+
+That means unfettered remote or physical access to the user's computer. That means the user's master password is also readable by the attacker. The only way to protect the user from this is not storing anything in memory, other than a brief instant when a retrieved encrypted value from the server is decrypted. 
+
+That is, having the user input the password on every decryption.
 
 #### Database Query
 
