@@ -8,6 +8,12 @@ const alreadyExists = dbFile !== ':memory:' && existsSync(dbFile);
 
 const db = promisifyAll(new sqlite3.Database(dbFile));
 
+const dbPrepare = db.prepare
+db.prepare = function(...args) {
+    const stmt = dbPrepare.apply(this, args);
+    return promisifyAll(stmt);
+};
+
 if (!alreadyExists) {
     db.serialize(() => {
         db.run(`
