@@ -125,7 +125,9 @@ The database can be secured using specific database users per api endpoint that 
 # Implementation details
 
 The web app implements all requirements (1-6). There's no pseudocode, the code is available at 
-`https://git.uwaterloo.ca/srolel/ece-458-a3` (and a private GitHub repository that I deploy from). It's also included in this submission.
+`https://git.uwaterloo.ca/srolel/ece-458-a3` (and a private GitHub repository that I deploy from). It's also included in this submission. 
+
+I provide an overview of the features below, as well as the technologies used. However, there are many implementation details that are not included here, but are in the code, such as the views, and error handling.
 
 A running instance of the app is available at `ece458a3.srolel.com`. 
 
@@ -215,6 +217,18 @@ db.prepare(`
 The view is available in `Register.tsx`.
 
 ### Confirm registration
+
+After registration, a token is generated and an email is sent to the user with a link to the `/confirm` page, with the token as a url parameter. It is then validated in the client and sent to the backend, which checks the token and sets the account status to active and clears the token. The UI shows the user feedback (success/failure).
+
+#### Database Query
+
+```
+db.prepare(`
+    UPDATE users 
+        SET active = 1, activationToken = NULL 
+    WHERE activationToken = ?
+`).runAsync(req.body.token);
+```
 
 The view is available in `Confirm.tsx`.
 
