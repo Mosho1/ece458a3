@@ -179,42 +179,6 @@ db.run(`
 `);
 ```
 
-### Queries
-
-Some examples of queries from `api.js`.
-
-#### Registration
-
-#### Adding a site
-
-```
-db.prepare(`
-    INSERT INTO passwords (site, site_username, site_password, user_id)
-    VALUES (?, ?, ?, ?)
-`).runAsync(
-    body.site,
-    body.site_username,
-    body.site_password,
-    userId
-);
-```
-
-#### Searching for sites
-
-```
-db.prepare(`
-    SELECT 
-        id,
-        site,
-        site_username,
-        site_password
-    FROM passwords 
-    WHERE 
-        user_id = ? AND
-        site = ?
-`).allAsync(userId, req.body.site);
-```
-
 ## Features
 
 1. `api.js` includes all the backend endpoints. A 401 status is sent back to the client if an unauthorized attempt to access an endpoint occurs, and a 400 status is sent if anything else went wrong. All endpoints accept only POST requests.
