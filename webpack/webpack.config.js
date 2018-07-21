@@ -71,7 +71,6 @@ module.exports = (env) => {
     },
 
     plugins: removeEmpty([
-      new HardSourceWebpackPlugin(),
       new HtmlWebpackPlugin({
         template: path.join(__dirname, '../src/index.html'),
         filename: 'index.html',
@@ -86,6 +85,7 @@ module.exports = (env) => {
         },
       }),
       new webpack.HotModuleReplacementPlugin(),
+      new HardSourceWebpackPlugin(),
       new webpack.NamedModulesPlugin(),
 
       new webpack.DefinePlugin({
