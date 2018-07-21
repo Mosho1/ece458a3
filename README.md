@@ -3,7 +3,7 @@
 1. Install node
 1. `npm i`
 1. Environment variables `EMAIL_ACCOUNT` and `EMAIL_PASSWORD` need to be set or sending email (for registration, forgot password) won't work. If it's a gmail account, it needs to have "Allow less secure apps" enabled.
-1. `npm start` / `npm run serve` for a development / production version.
+1. `npm start` / `npm run build-browser && npm run serve` for a development / production version.
 1. go to `localhost:3001`
 
 
