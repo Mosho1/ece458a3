@@ -2,13 +2,26 @@ import * as React from 'react';
 import { observer } from 'mobx-react';
 import AppState, { Site } from '../stores/AppState';
 import Link from './Link';
-import { withStyles, createStyles } from '@material-ui/core/styles';
-import { Grid, Paper, Theme, WithStyles, FormControl, InputLabel, Input, Button, CircularProgress, TableCell, TableRow, TableHead, Table, TableBody, IconButton, Tooltip } from '@material-ui/core';
-import { action, observable, runInAction } from 'mobx';
-import { green } from '@material-ui/core/colors';
+import { Theme, WithStyles, withStyles, createStyles } from '@material-ui/core/styles';
+import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
+import Input from '@material-ui/core/Input';
+import Button from '@material-ui/core/Button';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import TableCell from '@material-ui/core/TableCell';
+import TableRow from '@material-ui/core/TableRow';
+import TableHead from '@material-ui/core/TableHead';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
 import Visibility from '@material-ui/icons/Visibility';
 import ContentCopy from '@material-ui/icons/ContentCopy';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import { green } from '@material-ui/core/colors';
+import { action, observable, runInAction } from 'mobx';
 
 const rowStyles = (theme: Theme) => createStyles({
   passwordText: {

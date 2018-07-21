@@ -11,7 +11,6 @@ const Link = ({ href, ...rest }: React.AllHTMLAttributes<any>) =>
     href={href}
     style={{
       textDecoration: 'none',
-      color: 'inherit'
     }}
     onClick={pushState(href)} {...rest}
   />;

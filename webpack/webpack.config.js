@@ -2,6 +2,7 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const Autoprefixer = require('autoprefixer');
+const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 const path = require('path');
 
 
@@ -70,6 +71,7 @@ module.exports = (env) => {
     },
 
     plugins: removeEmpty([
+      new HardSourceWebpackPlugin(),
       new HtmlWebpackPlugin({
         template: path.join(__dirname, '../src/index.html'),
         filename: 'index.html',

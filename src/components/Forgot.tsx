@@ -2,8 +2,15 @@ import * as React from 'react';
 import { observer } from 'mobx-react';
 import AppState from '../stores/AppState';
 import Link from './Link';
-import { withStyles, createStyles } from '@material-ui/core/styles';
-import { Grid, Paper, Theme, WithStyles, FormControl, InputLabel, Input, Button, CircularProgress, FormHelperText } from '@material-ui/core';
+import { withStyles, createStyles, WithStyles, Theme } from '@material-ui/core/styles';
+import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
+import Input from '@material-ui/core/Input';
+import Button from '@material-ui/core/Button';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import FormHelperText from '@material-ui/core/FormHelperText';
 import { action, observable, runInAction } from 'mobx';
 import { green } from '@material-ui/core/colors';
 import Form from './Form';
@@ -53,13 +60,12 @@ export class Register extends React.Component<Props, any> {
     }
   };
 
-  @action
-  resetForm() {
+  resetForm = action(() => {
     this.mState.loading = false;
     this.mState.form = {
       email: '',
     };
-  }
+  });
 
   onSubmit = action(async (e: any) => {
     e.preventDefault();
@@ -79,9 +85,9 @@ export class Register extends React.Component<Props, any> {
         <Grid item xs={12} sm={10} md={8} lg={4} xl={3}>
           <Paper className={classes.paper}>
             <Grid justify="center" container>
-              <Form 
-              successMessage="Check your email!"
-              onSubmit={this.onSubmit}>
+              <Form
+                successMessage="Check your email!"
+                onSubmit={this.onSubmit}>
                 <Grid item xs={12}>
                   <FormControl required className={classes.formControl}>
                     <InputLabel htmlFor="email">Email</InputLabel>

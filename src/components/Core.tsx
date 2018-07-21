@@ -1,7 +1,21 @@
 import * as   React from 'react';
 import Link, { ButtonLink } from './Link';
 import mobx from './mobx.png';
-import { Theme, createStyles, AppBar, Toolbar, Typography, WithStyles, withStyles, Drawer, Divider, ListItem, ListItemIcon, ListItemText, List, Button, FormControl, InputLabel, Input, InputAdornment } from '@material-ui/core';
+import {WithStyles, Theme, withStyles, createStyles } from '@material-ui/core/styles';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import Drawer from '@material-ui/core/Drawer';
+import Divider from '@material-ui/core/Divider';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import List from '@material-ui/core/List';
+import Button from '@material-ui/core/Button';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
+import Input from '@material-ui/core/Input';
+import InputAdornment from '@material-ui/core/InputAdornment';
 import AddIcon from '@material-ui/icons/Add';
 import SearchIcon from '@material-ui/icons/Search';
 import { observer } from 'mobx-react';
@@ -103,7 +117,7 @@ class Core extends React.Component<Props> {
   }
   render() {
     const { appState, classes, children } = this.props;
-    const {state} = appState;
+    const { state } = appState;
 
     return <div className={classes.appFrame}>
       <AppBar
