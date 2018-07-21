@@ -10,6 +10,11 @@ COPY . .
 
 RUN npm run build-browser
 
+RUN chmod 666 db.sqlite3
+
+RUN useradd app
+USER app
+
 EXPOSE 3001
 
 ENV EMAIL_PASSWORD ''
