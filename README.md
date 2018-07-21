@@ -124,7 +124,16 @@ The database can be secured using specific database users per api endpoint that 
 
 # Implementation details
 
-The web app implements all requirements (1-6). There's no pseudocode, the code is available at XXXXXXXXX, and a running instance of the app is available at `ece458a3.srolel.com`. The following technologies were used:
+The web app implements all requirements (1-6). There's no pseudocode, the code is available at 
+`https://git.uwaterloo.ca/srolel/ece-458-a3` (and a private GitHub repository that I deploy from). It's also included in this submission.
+
+A running instance of the app is available at `ece458a3.srolel.com`. 
+
+The initial boilerplate was cloned from `https://github.com/mobxjs/react-mobx-boilerplate` (which I also wrote).
+
+The backend was implemented from scratch.
+
+The following technologies were used:
 
 ## Backend
 
@@ -132,7 +141,8 @@ The web app implements all requirements (1-6). There's no pseudocode, the code i
 1. Express - web server framework
 1. nodemailer - used to send emails using a gmail smtp
 1. node sqlite3 - sqlite implementation for Node
-1. AWS - hosting, domain, TLS certificate
+1. AWS - hosting, domain, TLS certificate, load balancer
+1. nginx - reverse proxy from the load balancer to the app
 
 ## Frontend
 
@@ -144,10 +154,6 @@ The web app implements all requirements (1-6). There's no pseudocode, the code i
 ## Shared
 
 1. asmcrypto.js - crypto algorithm implementations
-
-The initial boilerplate was cloned from `https://github.com/mobxjs/react-mobx-boilerplate` (which I also wrote).
-
-The backend was implemented from scratch.
 
 ## Database
 
