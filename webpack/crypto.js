@@ -14,30 +14,29 @@ const getPbkdf2Hash = (str, salt, count = 4096, dklen = 64) => {
 const generateToken = (length = 24) =>
     new Promise((resolve, reject) => require('crypto').randomBytes(length, function (err, buffer) {
         if (err) reject(err)
-        else resolve(buffer.toString('hex'));
+        else buffer.toString('hex');
     }));
 
 const encrypt = key => async clearText => {
-    await new Promise(res => setTimeout(res));
+    await new Promise(res => setTimeout(res, 10));
     key = getPbkdf2Hash(key, key, 1, 16);
     const nonce = await generateToken(8);
-    const encrypted = crypto.bytes_to_string(crypto.AES_GCM.encrypt(
+    const encrypted = crypto.AES_GCM.encrypt(
         crypto.string_to_bytes(clearText),
         crypto.string_to_bytes(key),
-        crypto.string_to_bytes(nonce.toString()),
-    ));
-    return nonce + new TextEncoder('utf-8').encode(encrypted);
+        crypto.hex_to_bytes(nonce)
+    );
+    return nonce + crypto.bytes_to_hex(encrypted);
 };
 
 const decrypt = key => value => {
     key = getPbkdf2Hash(key, key, 1, 16);
-    const nonce = value.slice(0, 8);
-    const valueArray = new Uint8Array(value.slice(10).split(','));
-    const cipherText = new TextDecoder('utf-8').decode(valueArray);
+    const nonce = value.slice(0, 16);
+    const cipherText = value.slice(16);
     return crypto.bytes_to_string(crypto.AES_GCM.decrypt(
-        crypto.string_to_bytes(cipherText),
+        crypto.hex_to_bytes(cipherText),
         crypto.string_to_bytes(key),
-        crypto.string_to_bytes(nonce.toString()),
+        crypto.hex_to_bytes(nonce),
     ));
 };
 
