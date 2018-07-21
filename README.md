@@ -5,6 +5,11 @@
 1. `npm start` / `npm run serve` for a development / production version.
 
 
+# Note
+
+I realize this may be beyond the planned scope of the assignment, however I enjoyed learning about security and cryptography, and I also enjoy making web apps. So I thought I'd go the extra mile :)
+
+
 # List of defenses
 
 ## Session management
