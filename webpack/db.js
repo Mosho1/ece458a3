@@ -6,10 +6,10 @@ const dbFile = './db.sqlite3';
 
 const alreadyExists = dbFile !== ':memory:' && existsSync(dbFile);
 
-const db = promisifyAll(new sqlite3.Database(dbFile));
+const db = promisifyAll(new sqlite3.Database(dbFile, sqlite3.OPEN_READWRITE));
 
 const dbPrepare = db.prepare
-db.prepare = function(...args) {
+db.prepare = function (...args) {
     const stmt = dbPrepare.apply(this, args);
     return promisifyAll(stmt);
 };
