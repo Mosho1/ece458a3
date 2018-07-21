@@ -14,11 +14,11 @@ const getPbkdf2Hash = (str, salt, count = 4096, dklen = 64) => {
 const generateToken = (length = 24) =>
     new Promise((resolve, reject) => require('crypto').randomBytes(length, function (err, buffer) {
         if (err) reject(err)
-        else buffer.toString('hex');
+        else resolve(buffer.toString('hex'));
     }));
 
 const encrypt = key => async clearText => {
-    await new Promise(res => setTimeout(res, 10));
+    await new Promise(res => setTimeout(res));
     key = getPbkdf2Hash(key, key, 1, 16);
     const nonce = await generateToken(8);
     const encrypted = crypto.AES_GCM.encrypt(
