@@ -13,7 +13,7 @@ I realize this may be beyond the planned scope of the assignment, however I enjo
 
 # List of defenses
 
-Defensive measured taken according to OWASP.
+Defensive measures taken according to OWASP.
 
 ## Session management
 
