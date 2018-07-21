@@ -48,11 +48,15 @@ const didTokenExpire = (token) => {
     return Number(new Date()) > Number(token.slice(0, 13));
 };
 
+const validateHexToken = token => token.match(/^[a-z0-9]+$/i);
+
 module.exports = {
     getPbkdf2Hash,
     generateToken,
     encrypt,
     decrypt,
     generateTokenWithExpiry,
-    didTokenExpire
+    didTokenExpire,
+    validateHexToken
 };
+

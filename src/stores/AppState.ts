@@ -2,7 +2,7 @@ import { observable, action, runInAction, computed } from 'mobx';
 import { Login } from '../components/Login';
 import { Search } from '../components/Search';
 import { Add } from '../components/Add';
-import { encrypt, decrypt } from '../../webpack/crypto';
+import { encrypt, decrypt, validateHexToken } from '../../webpack/crypto';
 import { readCookie } from './utils';
 
 export interface Site {
@@ -152,6 +152,7 @@ export class AppState {
     const params = new URLSearchParams(location.search.slice(1));
     const token = params.get('token');
     if (!token) throw new Error('could not change password');
+    if (!validateHexToken(token)) throw new Error('token tampered with!');
     await this.apiRequest('change-password', {
       method: 'POST',
       body: JSON.stringify({
@@ -168,6 +169,7 @@ export class AppState {
       const params = new URLSearchParams(location.search.slice(1));
       const token = params.get('token');
       if (!token) throw new Error('could not confirm account');
+      if (!validateHexToken(token)) throw new Error('token tampered with!');
       await this.apiRequest(`confirm`, {
         method: 'POST',
         body: JSON.stringify({
