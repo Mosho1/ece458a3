@@ -1,3 +1,10 @@
+# Running the app
+
+1. Install node
+1. `npm i`
+1. `npm start` / `npm run serve` for a development / production version.
+
+
 # List of defenses
 
 ## Session management
