@@ -170,6 +170,19 @@ export class AppState {
     }
   }
 
+  async addSite(form: {site: string, site_password: string, site_username: string}) {
+    const site_username = await this.encrypt(form.site_username);
+    const site_password = await this.encrypt(form.site_password);
+    const res = await this.apiRequest('passwords', {
+      method: 'POST',
+      body: JSON.stringify({
+        site: form.site,
+        site_password,
+        site_username,
+      })
+    });
+  }
+
   logout = async () => {
     try {
       await this.apiRequest('logout', {

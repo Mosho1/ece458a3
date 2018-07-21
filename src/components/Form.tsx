@@ -31,7 +31,7 @@ const styles = (theme: Theme) => createStyles({
   },
   button: {
     margin: theme.spacing.unit * 2,
-    marginBottom: 0
+    marginBottom: theme.spacing.unit
   },
   buttonProgress: {
     color: green[500],

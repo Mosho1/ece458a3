@@ -12,6 +12,7 @@ import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { action, observable, runInAction } from 'mobx';
 import { green } from '@material-ui/core/colors';
+import Form from './Form';
 
 const styles = (theme: Theme) => createStyles({
   root: {
@@ -68,31 +69,10 @@ export class Add extends React.Component<Props, any> {
     };
   })
 
-  async addSite() {
-    const { appState } = this.props;
-    const site_username = await appState.encrypt(this.mState.form.site_username);
-    const site_password = await appState.encrypt(this.mState.form.site_password);
-    const res = await appState.apiRequest('passwords', {
-      method: 'POST',
-      body: JSON.stringify({
-        site: this.mState.form.site,
-        site_password,
-        site_username,
-      })
-    });
-
-    this.resetForm();
-  }
-
   onSubmit = action(async (e: any) => {
     e.preventDefault();
-    const { context, appState } = this.props;
-    try {
-      this.mState.loading = true;
-      await this.addSite();
-    } finally {
-      runInAction(() => this.mState.loading = false);
-    }
+    await this.props.appState.addSite(this.mState.form);
+    this.resetForm();
   });
 
   onChangeSite = action((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -114,7 +94,10 @@ export class Add extends React.Component<Props, any> {
         <Grid item xs={12} sm={10} md={8} lg={4} xl={3}>
           <Paper className={classes.paper}>
             <Grid justify="center" container>
-              <form onSubmit={this.onSubmit} className={classes.form}>
+              <Form
+                buttonText="Add"
+                successMessage="Site added successfully."
+                onSubmit={this.onSubmit}>
                 <Grid item xs={12}>
                   <FormControl required className={classes.formControl}>
                     <InputLabel htmlFor="username">Site</InputLabel>
@@ -142,24 +125,7 @@ export class Add extends React.Component<Props, any> {
                       onChange={this.onChangeSitePassword} />
                   </FormControl>
                 </Grid>
-                <Grid item xs={12}>
-                  <FormControl className={classes.formControl}>
-                    <Button
-                      disabled={this.mState.loading}
-                      variant="contained"
-                      type="submit"
-                      color="primary"
-                      className={classes.button}>
-                      Add
-                    </Button>
-                    {this.mState.loading &&
-                      <CircularProgress
-                        size={24}
-                        className={classes.buttonProgress}
-                      />}
-                  </FormControl>
-                </Grid>
-              </form>
+              </Form>
             </Grid>
           </Paper>
         </Grid>
