@@ -247,9 +247,9 @@ api.post('/login', async (req, res, next) => {
         const token = await generateToken();
         
         await db.prepare(`
-        UPDATE users 
-        SET authToken = ?
-        WHERE username = ?
+            UPDATE users 
+            SET authToken = ?
+            WHERE username = ?
         `).runAsync(getPbkdf2Hash(token, cookieSalt), body.username);
         
         setCookie(res, token);
@@ -374,7 +374,7 @@ api.post('/passwords', async (req, res, next) => {
             body.site_username,
             body.site_password,
             userId
-            );
+        );
 
         res.sendStatus(200);
     } catch (e) {
