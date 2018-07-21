@@ -5,8 +5,6 @@ const Autoprefixer = require('autoprefixer');
 const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 const path = require('path');
 
-
-
 module.exports = (env) => {
   const ifProd = plugin => env.prod ? plugin : undefined;
   const ifDev = plugin => env.dev ? plugin : undefined;
@@ -38,7 +36,7 @@ module.exports = (env) => {
       // publicPath: '/', can uncomment if you want everything relative to root '/'
     },
     optimization: {
-      minimize: env.prod,
+      minimize: false, //env.prod,
       splitChunks: {
         chunks: 'all',
       }

@@ -12,4 +12,7 @@ RUN npm run build-browser
 
 EXPOSE 3001
 
-CMD ["/bin/bash"]
+ENV EMAIL_PASSWORD ''
+ENV EMAIL_ACCOUNT ''
+
+CMD ["npm", "run", "serve"]

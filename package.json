@@ -23,7 +23,6 @@
     "bluebird": "^3.5.1",
     "body-parser": "^1.18.3",
     "cookie-parser": "^1.4.3",
-    "csurf": "^1.9.0",
     "hard-source-webpack-plugin": "^0.11.1",
     "mobx": "4.3.1",
     "mobx-react": "5.2.3",
@@ -31,7 +30,6 @@
     "react": "16.4.1",
     "react-dom": "16.4.1",
     "routes": "2.1.0",
-    "sjcl": "^1.0.7",
     "sqlite3": "^4.0.2",
     "sqlstring": "^2.3.1",
     "util.promisify-all": "^1.0.2"
