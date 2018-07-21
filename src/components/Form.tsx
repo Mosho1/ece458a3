@@ -99,7 +99,7 @@ export class Form extends React.Component<Props, any> {
     if (!successMessage) return null;
     if (status !== 'success') return null;
     if (typeof successMessage !== 'string') return successMessage;
-    return <Typography>{successMessage}</Typography>;
+    return <Typography color="primary">{successMessage}</Typography>;
   }
 
   get errorMessage() {
