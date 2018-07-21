@@ -1,82 +1,41 @@
-# React MobX Boilerplate
- 
-A modern web development boilerplate for React + MobX + Webpack 4.
-## Stack
+# List of defenses
 
-* React
-* MobX
-* Webpack 4
-* Typescript
-* PostCSS + CSS Modules
+## Session management
 
-## Features
+Secure, HttpOnly, SameSite and MaxAge (1 hour) are used. Domain value is set to the hostname including subdomain by default.
 
-* HMR of components and store
-* Code-splitting out of the box
-* Simple routing (without react-router)
-* Server-side rendering with async data loading
+TLS is used for all communication, with a 301 redirect from http to https.
 
-## Installation and Starting
+## XSS
 
-### Development server
-```
-npm start
-> visit localhost:3000
-```
+Since React is used, all generated HTML is sanitized by default. React only allows un-sanitized strings in HTML using `dangerouslySetInnerHTML`, which we don't do.
 
-### Building for production
-```
-npm run build
-> serve index.html
-```
+The header `Content-Type: application/json;` is set on all requests/responses.
 
-### Building for node (server-side rendering)
-```
-npm run build-node
-> require('build/app.node.js').default('/users')
-```
+Tokens from url params are verified using a regex.
 
+## CSRF
 
-## Structure
+A CSRF synchronization token is used, in addition to the SameSite flag for the cookies.
 
-During app development, you should care about these files:
+## SQL injection
 
-```
-react-mobx-boilerplate/
-└───src/
-    │
-    └───components/
-    |     Core.tsx
-    |     ...
-    |
-    └───stores/
-    |     AppState.ts
-    |
-    └───routes.tsx
-```
+All url params and GET request bodies are escaped.
 
-The rest can be extended if needed:
+All database queries are built using `db.prepare`.
 
-1. `index.html`
-1. `index.ts` - Entry point for browser bundle
-1. `index.node.ts` - Entry point for node (server-side rendering) bundle
-1. `App.ts` - Manages routing, contains a reference to AppState
-1. `root.tsx` - Container component for the app
-1. `webpack/webpack-dev-server.js` - Script to run the development server
-1. `webpack/webpack.config.js` - Webpack configuration for browser bundle
-1. `webpack/webpack.config.node.js` - Webpack configuration for node (server-side rendering) bundle
+## Hashing
 
-Typically, when adding a new page you'd add a route for it in `routes.tsx` containing the component to render. Note that the component isn't imported directly but with import() for code splitting. Then you can add the component to the components folder and the relevant state to the store.
+Usernames and passwords are hashed using PBKDF2 - slower than SHA by design to increase work that needs to be done by an attacker, while having no real consequence for the user (who only has to do it once).
 
-This project is a boilerplate and does not impose strong architectural decisions on users.
+## Encryption
 
+AES-GCM is used on the client-side to encrypt site usernames and passwords. A random nonce is used. Only the encrypted values are ever transmitted to the server.
 
-## TODO
+## Other defenses
 
-- [x] Full SSR workflow
-- [x] Optimize bundles
-- [x] Static assets (images etc.)
-- [ ] Make work with remote chrome debugging
-- [ ] Add linter
-- [ ] Add PostCSS plugins
-- [x] Use webpack-dev-middleware instead of webpack-dev-server
+SSH access is blocked through AWS security groups
+
+The app runs in a docker container with an almost completely non-privileged user. The app is started with PID 1, and if stopped will exit completely.
+
+The master password is saved in the context of a module and can't be read from the global context, in case the user executes malicious code in the console or runs an external script in the page. The only way to see it is to inspect the browser's memory or set a breakpoint in the developer's tools.
