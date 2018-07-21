@@ -36,7 +36,7 @@ export const defaultRoute: Route = {
 };
 
 const authenticateRoute = (redirectToLogin = true) => async (appState: AppState, params) => {
-  if (appState.loggedInAs === null) {
+  if (appState.state.loggedInAs === null) {
     appState.goTo('/login');
     return false;
     // await appState.refreshToken();

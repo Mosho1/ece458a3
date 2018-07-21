@@ -103,6 +103,7 @@ class Core extends React.Component<Props> {
   }
   render() {
     const { appState, classes, children } = this.props;
+    const {state} = appState;
 
     return <div className={classes.appFrame}>
       <AppBar
@@ -113,14 +114,14 @@ class Core extends React.Component<Props> {
             variant="title"
             color="inherit"
             className={`${classes.title} ${classes.flex}`}>
-            {appState.loggedInAs && `Welcome, ${appState.loggedInAs}!`}
+            {state.loggedInAs && `Welcome, ${state.loggedInAs}!`}
           </Typography>
-          {appState.loggedInAs && <FormControl
+          {state.loggedInAs && <FormControl
             className={`${classes.flex} ${classes.searchFormControl}`}
           >
             <Input
-              id="password"
-              value={appState.searchTerm}
+              id="search-site-name"
+              value={state.searchTerm}
               placeholder="Enter site name"
               className={classes.searchInput}
               onChange={this.onSearch}
@@ -132,7 +133,7 @@ class Core extends React.Component<Props> {
               }
             />
           </FormControl>}
-          {appState.loggedInAs
+          {state.loggedInAs
             ? <Button onClick={appState.logout} color="inherit">Logout</Button>
             : [
               <ButtonLink key="0" href="/login" color="inherit">Login</ButtonLink>,
@@ -145,7 +146,7 @@ class Core extends React.Component<Props> {
         <div className={classes.toolbar} />
         {children}
       </main>
-      {appState.loggedInAs &&
+      {state.loggedInAs &&
         <ButtonLink href="/add" variant="fab" className={classes.fab} color="primary">
           <AddIcon />
         </ButtonLink>}

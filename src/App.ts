@@ -2,7 +2,6 @@ import { configure, observable, action } from 'mobx';
 import { Router } from 'routes';
 import { routes, defaultRoute, Route } from './routes';
 import AppState from './stores/AppState';
-
 configure({
   // enforceActions: true
 });
@@ -76,7 +75,7 @@ class App {
 
       this.onpopstate = window.onpopstate;
       window.onpopstate = (e: PopStateEvent) => {
-        this.onpopstate.apply(window, e);
+        if (this.onpopstate) this.onpopstate.apply(window, e);
         this.updateLocation();
       };
 

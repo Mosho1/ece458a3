@@ -10,7 +10,6 @@ interface Props { app: App }
 
 @observer
 class Root extends React.Component<Props, {}> {
-
   render() {
     const { routeComponent, appState } = this.props.app;
     return (

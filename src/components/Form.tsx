@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import AppState from '../stores/AppState';
 import Link from './Link';
 import { withStyles, createStyles } from '@material-ui/core/styles';
 import { Grid, Paper, Theme, WithStyles, FormControl, InputLabel, Input, Button, CircularProgress, Typography } from '@material-ui/core';
@@ -17,39 +16,42 @@ const styles = (theme: Theme) => createStyles({
     color: theme.palette.text.secondary,
   },
   form: {
+    marginBottom: theme.spacing.unit,
   },
   formControl: {
     margin: theme.spacing.unit,
   },
   button: {
     margin: theme.spacing.unit * 2,
+    marginBottom: 0
   },
   buttonProgress: {
     color: green[500],
     position: 'absolute',
     top: '50%',
     left: '50%',
-    marginTop: -12,
+    marginTop: -4,
     marginLeft: -12,
   },
 });
 
 interface Props extends WithStyles<typeof styles> {
-  appState: AppState;
   onSubmit: Function;
   onSuccess?: Function;
   onError?: Function;
   afterSubmit?: Function;
   buttonText?: string;
-  successMessage?: string;
-  errorMessage?: string;
+  successMessage?: string | JSX.Element | JSX.Element[];
+  errorMessage?: string | JSX.Element | JSX.Element[];
 }
 
 @observer
-export class Login extends React.Component<Props, any> {
+export class Form extends React.Component<Props, any> {
 
   static defaultProps: Partial<Props> = {
     buttonText: 'Submit',
+    errorMessage: 'Something went wrong!',
+    successMessage: 'Submitted successfully',
     afterSubmit: () => null,
     onSuccess: () => null,
     onError: () => null,
@@ -60,63 +62,79 @@ export class Login extends React.Component<Props, any> {
   }
 
   @observable mState = {
-    loading: false,
-    error: false,
-    success: false
+    status: null as null | 'start' | 'success' | 'error',
   };
 
   @action
   resetForm() {
-    this.mState.loading = false;
+    this.mState.status = null;
   }
+
 
   onSubmit = action(async (e: any) => {
     e.preventDefault();
     try {
-      this.mState.loading = true;
-      this.mState.error = false;
-      this.mState.success = false;
-
+      this.mState.status = 'start';
       await this.props.onSubmit(e);
-
-      this.mState.success = true;
+      this.mState.status = 'success';
       this.props.onSuccess();
-    } catch(e) {
+    } catch (e) {
       console.error(e);
-      this.mState.error = true;
+      this.mState.status = 'error';
       this.props.onError();
     } finally {
       this.props.afterSubmit();
-      this.resetForm();
-      runInAction(() => this.mState.loading = false);
     }
   })
 
+  get successMessage() {
+    const { successMessage } = this.props;
+    const { status } = this.mState;
+    if (!successMessage) return null;
+    if (status !== 'success') return null;
+    if (typeof successMessage !== 'string') return successMessage;
+    return <Typography>{successMessage}</Typography>;
+  }
+
+  get errorMessage() {
+    const { errorMessage } = this.props;
+    const { status } = this.mState;
+    if (!errorMessage) return null;
+    if (status !== 'error') return null;
+    if (typeof errorMessage !== 'string') return errorMessage;
+    return <Typography color="error">{errorMessage}</Typography>;
+  }
+
   render() {
-    const { appState, classes, children, buttonText, successMessage, errorMessage } = this.props;
+    const { classes, children, buttonText } = this.props;
+    const { status } = this.mState;
     return (
       <form onSubmit={this.onSubmit} className={classes.form}>
         {children}
         <Grid item xs={12}>
           <FormControl className={classes.formControl}>
             <Button
-              disabled={this.mState.loading}
+              disabled={status === 'start'}
               variant="contained"
               type="submit"
               color="primary"
               className={classes.button}>
               {buttonText}
-                    </Button>
-            {this.mState.loading &&
+            </Button>
+            {status === 'start' &&
               <CircularProgress
                 size={24}
                 className={classes.buttonProgress}
               />}
           </FormControl>
         </Grid>
+        <Grid item xs={12}>
+          {this.successMessage}
+          {this.errorMessage}
+        </Grid>
       </form>
     );
   }
 }
 
-export default withStyles(styles)(Login);
+export default withStyles(styles)(Form);

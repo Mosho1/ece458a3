@@ -6,6 +6,7 @@ import { withStyles, createStyles } from '@material-ui/core/styles';
 import { Grid, Paper, Theme, WithStyles, FormControl, InputLabel, Input, Button, CircularProgress, FormHelperText } from '@material-ui/core';
 import { action, observable, runInAction } from 'mobx';
 import { green } from '@material-ui/core/colors';
+import Form from './Form';
 
 const styles = (theme: Theme) => createStyles({
   root: {
@@ -64,13 +65,7 @@ export class Register extends React.Component<Props, any> {
     e.preventDefault();
     const { appState } = this.props;
     const { form } = this.mState;
-    try {
-      this.mState.loading = true;
-      await appState.forgotPassword(form);
-    } finally {
-      this.resetForm();
-      runInAction(() => this.mState.loading = false);
-    }
+    await appState.forgotPassword(form);
   })
 
   onChangeEmail = action((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,7 +79,9 @@ export class Register extends React.Component<Props, any> {
         <Grid item xs={12} sm={10} md={8} lg={4} xl={3}>
           <Paper className={classes.paper}>
             <Grid justify="center" container>
-              <form onSubmit={this.onSubmit} className={classes.form}>
+              <Form 
+              successMessage="Check your email!"
+              onSubmit={this.onSubmit}>
                 <Grid item xs={12}>
                   <FormControl required className={classes.formControl}>
                     <InputLabel htmlFor="email">Email</InputLabel>
@@ -95,24 +92,7 @@ export class Register extends React.Component<Props, any> {
                       onChange={this.onChangeEmail} />
                   </FormControl>
                 </Grid>
-                <Grid item xs={12}>
-                  <FormControl className={classes.formControl}>
-                    <Button
-                      disabled={this.mState.loading}
-                      variant="contained"
-                      type="submit"
-                      color="primary"
-                      className={classes.button}>
-                      Submit
-                    </Button>
-                    {this.mState.loading &&
-                      <CircularProgress
-                        size={24}
-                        className={classes.buttonProgress}
-                      />}
-                  </FormControl>
-                </Grid>
-              </form>
+              </Form>
             </Grid>
           </Paper>
         </Grid>

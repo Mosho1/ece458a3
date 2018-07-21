@@ -137,7 +137,7 @@ export class Search extends React.Component<Props, any> {
 
   get tableBody() {
     const { classes, appState } = this.props;
-    const { searchResults } = appState;
+    const { searchResults } = appState.state;
     if (searchResults === null) {
       return <TableBody>
         <TableRow>
@@ -162,7 +162,7 @@ export class Search extends React.Component<Props, any> {
     }
 
     return <TableBody>
-      {appState.searchResults.map(n =>
+      {searchResults.map(n =>
         <SearchRow key={n.id} site={n} />
       )}
     </TableBody>;

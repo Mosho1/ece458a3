@@ -6,6 +6,7 @@ import { withStyles, createStyles } from '@material-ui/core/styles';
 import { Grid, Paper, Theme, WithStyles, FormControl, InputLabel, Input, Button, CircularProgress, Typography } from '@material-ui/core';
 import { action, observable, runInAction } from 'mobx';
 import { green } from '@material-ui/core/colors';
+import Form from './Form';
 
 const styles = (theme: Theme) => createStyles({
   root: {
@@ -15,8 +16,6 @@ const styles = (theme: Theme) => createStyles({
     padding: theme.spacing.unit * 2,
     textAlign: 'center',
     color: theme.palette.text.secondary,
-  },
-  form: {
   },
   formControl: {
     margin: theme.spacing.unit,
@@ -29,7 +28,7 @@ const styles = (theme: Theme) => createStyles({
     position: 'absolute',
     top: '50%',
     left: '50%',
-    marginTop: -12,
+    marginTop: -6,
     marginLeft: -12,
   },
 });
@@ -46,7 +45,6 @@ export class Login extends React.Component<Props, any> {
   }
 
   @observable mState = {
-    loading: false,
     form: {
       username: '',
       email: '',
@@ -56,7 +54,6 @@ export class Login extends React.Component<Props, any> {
 
   @action
   resetForm() {
-    this.mState.loading = false;
     this.mState.form = {
       username: '',
       email: '',
@@ -67,13 +64,7 @@ export class Login extends React.Component<Props, any> {
   onSubmit = action(async (e: any) => {
     e.preventDefault();
     const { appState } = this.props;
-    try {
-      this.mState.loading = true;
-      await appState.login(this.mState.form);
-    } finally {
-      this.resetForm();
-      runInAction(() => this.mState.loading = false);
-    }
+    await appState.login(this.mState.form);
   })
 
   onChangeUsername = action((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,7 +86,10 @@ export class Login extends React.Component<Props, any> {
         <Grid item xs={12} sm={10} md={8} lg={4} xl={3}>
           <Paper className={classes.paper}>
             <Grid justify="center" container>
-              <form onSubmit={this.onSubmit} className={classes.form}>
+              <Form
+                buttonText="Log in"
+                errorMessage="Wrong username or password"
+                onSubmit={this.onSubmit}>
                 <Grid item xs={12}>
                   <FormControl required className={classes.formControl}>
                     <InputLabel htmlFor="username">Username</InputLabel>
@@ -115,24 +109,7 @@ export class Login extends React.Component<Props, any> {
                       onChange={this.onChangePassword} />
                   </FormControl>
                 </Grid>
-                <Grid item xs={12}>
-                  <FormControl className={classes.formControl}>
-                    <Button
-                      disabled={this.mState.loading}
-                      variant="contained"
-                      type="submit"
-                      color="primary"
-                      className={classes.button}>
-                      Login
-                    </Button>
-                    {this.mState.loading &&
-                      <CircularProgress
-                        size={24}
-                        className={classes.buttonProgress}
-                      />}
-                  </FormControl>
-                </Grid>
-              </form>
+              </Form>
               <Grid item xs={12}>
                 <Typography><Link href="/forgot">Forgot password?</Link></Typography>
               </Grid>

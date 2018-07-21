@@ -15,28 +15,31 @@ export interface Site {
 * This is the entry point for the app's state. All stores should go here.
 */
 export class AppState {
-  @observable loggedInAs: string | null = null;
-  @observable masterKey: string | null = null;
-  @observable searchTerm = '';
-  @observable searchResults: Site[] | null = null;
+
+  @observable state = {
+    loggedInAs: null as string | null,
+    masterKey: null as string | null,
+    searchTerm: '',
+    searchResults: null as Site[] | null,
+  }
 
   @action
   resetState() {
-    this.loggedInAs = null;
-    this.masterKey = null;
-    this.searchResults = null;
+    this.state.loggedInAs = null;
+    this.state.masterKey = null;
+    this.state.searchResults = null;
   }
 
   setSearchTerm(value: string) {
-    this.searchTerm = value;
+    this.state.searchTerm = value;
   }
 
   @computed get encrypt() {
-    return encrypt(this.masterKey);
+    return encrypt(this.state.masterKey);
   }
 
   @computed get decrypt() {
-    return decrypt(this.masterKey);
+    return decrypt(this.state.masterKey);
   }
 
   onUnauthorized() {
@@ -45,11 +48,11 @@ export class AppState {
   }
 
   async searchForSites() {
-    this.searchResults = null;
+    this.state.searchResults = null;
     this.goTo('/search');
-    const res = await this.apiRequest(`/passwords/search?site=${this.searchTerm}`);
+    const res = await this.apiRequest(`/passwords/search?site=${this.state.searchTerm}`);
     const encryptedResults = await res.json() as Site[];
-    this.searchResults = encryptedResults.map(x => ({
+    this.state.searchResults = encryptedResults.map(x => ({
       id: x.id,
       site: x.site,
       site_username: this.decrypt(x.site_username),
@@ -66,7 +69,7 @@ export class AppState {
       const user = await res.json();
 
       runInAction(() => {
-        this.loggedInAs = user.username;
+        this.state.loggedInAs = user.username;
       });
     } catch (e) {
       console.error(e);
@@ -108,8 +111,8 @@ export class AppState {
       })
     });
     runInAction(() => {
-      this.loggedInAs = username;
-      this.masterKey = password;
+      this.state.loggedInAs = username;
+      this.state.masterKey = password;
     });
     this.goTo('/add');
   }
@@ -156,7 +159,7 @@ export class AppState {
       if (!token) throw new Error('could not confirm account');
       await this.apiRequest(`confirm`, {
         method: 'POST',
-        body:JSON.stringify({
+        body: JSON.stringify({
           token
         })
       });
@@ -180,7 +183,7 @@ export class AppState {
   @action
   reload(store?: AppState) {
     if (store) {
-      Object.assign(this, store);
+      Object.assign(this.state, store.state);
     }
     return this;
   }
