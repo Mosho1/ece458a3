@@ -250,7 +250,7 @@ const didTokenExpire = (token) => {
 };
 ```
 
-An email is sent to the user with a link that includes the token, and the user will be prompted to choose a new password in the page it leads to (the token is validated on the client side).
+An email is sent (from a proprietary gmail account) to the user with a link that includes the token, and the user will be prompted to choose a new password in the page it leads to (the token is validated on the client side).
 
 The code for the view is in `Forgot.tsx` and `Recover.tsx`.
 
@@ -293,3 +293,11 @@ const rows = await db.prepare(`
 ```
 
 The view is available in `Search.tsx`.
+
+# Deployment
+
+Hosting, the domain and TLS certificate are provided with a free-tier AWS account.
+
+The deployment script is `deploy.sh`, and the Dockerfile is in... `Dockerfile`. 
+
+Continuous deployment is set up using GitHub webhooks with a modest CI server I wrote, available at https://github.com/Mosho1/ci.
