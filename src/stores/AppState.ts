@@ -3,6 +3,7 @@ import { Login } from '../components/Login';
 import { Search } from '../components/Search';
 import { Add } from '../components/Add';
 import { encrypt, decrypt } from '../../webpack/crypto';
+import { readCookie } from './utils';
 
 export interface Site {
   id: number,
@@ -51,7 +52,13 @@ export class AppState {
   async searchForSites() {
     this.state.searchResults = null;
     this.goTo('/search');
-    const res = await this.apiRequest(`/passwords/search?site=${this.state.searchTerm}`);
+    const res = await this.apiRequest(`/passwords/search`, {
+      method: 'POST',
+      body: JSON.stringify({
+        site: this.state.searchTerm,
+        csrfToken: readCookie('csrfToken')
+      })
+    });
     const encryptedResults = await res.json() as Site[];
     this.state.searchResults = encryptedResults.map(x => ({
       id: x.id,
@@ -64,7 +71,10 @@ export class AppState {
   async refreshToken() {
     try {
       const res = await this.apiRequest('refresh', {
-        method: 'POST'
+        method: 'POST',
+        body: JSON.stringify({
+          csrfToken: readCookie('csrfToken')
+        })
       });
 
       const user = await res.json();
@@ -171,7 +181,7 @@ export class AppState {
     }
   }
 
-  async addSite(form: {site: string, site_password: string, site_username: string}) {
+  async addSite(form: { site: string, site_password: string, site_username: string }) {
     const site_username = await this.encrypt(form.site_username);
     const site_password = await this.encrypt(form.site_password);
     const res = await this.apiRequest('passwords', {
@@ -180,6 +190,7 @@ export class AppState {
         site: form.site,
         site_password,
         site_username,
+        csrfToken: readCookie('csrfToken')
       })
     });
   }

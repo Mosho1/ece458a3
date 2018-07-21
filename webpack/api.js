@@ -21,6 +21,8 @@ api.use(cookieParser());
 let cookieName = 'cookieName';
 let cookieSalt = 'cookieSalt';
 
+const csrfCookieName = 'csrfToken';
+
 (async () => {
     cookieName = (await generateToken()).slice(0, 10);
     cookieSalt = await generateToken();
@@ -38,6 +40,23 @@ api.use((req, res, next) => {
     next();
 });
 
+
+const logUserOut = async (req, res) => {
+    await db.prepare(`
+        UPDATE users 
+            SET authToken = NULL
+        WHERE authToken = ?
+    `).runAsync(getPbkdf2Hash(req.cookies[cookieName], cookieSalt));
+
+    res.clearCookie(cookieName);
+};
+
+const CSRFProtection = async (req, res) => {
+    if (req.body[csrfCookieName] !== req.cookies[csrfCookieName]) {
+        await logUserOut(req, res);
+        throw new Error('possible CSRF attack detected, logging user out');
+    }
+};
 
 const callbackWithError = (res, cb) => function (err) {
     if (err) {
@@ -198,6 +217,14 @@ const setCookie = (res, value) => {
     });
 };
 
+const setCsrfCookie = (res, value) => {
+    res.cookie(csrfCookieName, value, {
+        maxAge: 60 * 60 * 1000,
+        sameSite: true
+        // secure: true
+    });
+};
+
 api.post('/login', async (req, res, next) => {
     try {
         const { body } = req;
@@ -218,14 +245,18 @@ api.post('/login', async (req, res, next) => {
         }
 
         const token = await generateToken();
-
+        
         await db.prepare(`
-            UPDATE users 
-                SET authToken = ?
-            WHERE username = ?
+        UPDATE users 
+        SET authToken = ?
+        WHERE username = ?
         `).runAsync(getPbkdf2Hash(token, cookieSalt), body.username);
-
+        
         setCookie(res, token);
+
+        const csrfToken = await generateToken();
+        setCsrfCookie(res, csrfToken);
+
         res.sendStatus(200);
     } catch (e) {
         console.error(e);
@@ -278,6 +309,8 @@ api.post('/refresh', async (req, res, next) => {
             return res.sendStatus(401);
         }
 
+        await CSRFProtection(req, res);
+
         const user = await getUserFromAuthToken(cookies[cookieName]);
 
         if (!user) {
@@ -285,14 +318,17 @@ api.post('/refresh', async (req, res, next) => {
         }
 
         const token = await generateToken();
-
+        
         await db.prepare(`
-            UPDATE users 
-                SET authToken = ?
-            WHERE id = ?
+        UPDATE users 
+        SET authToken = ?
+        WHERE id = ?
         `).runAsync(getPbkdf2Hash(token, cookieSalt), user.id);
-
+        
         setCookie(res, token);
+
+        const csrfToken = await generateToken();
+        setCsrfCookie(res, csrfToken);
 
         res.send({
             username: user.username
@@ -305,13 +341,7 @@ api.post('/refresh', async (req, res, next) => {
 
 api.post('/logout', async (req, res, next) => {
     try {
-        await db.prepare(`
-            UPDATE users 
-                SET authToken = NULL
-            WHERE authToken = ?
-        `).runAsync(getPbkdf2Hash(req.cookies[cookieName], cookieSalt));
-
-        res.clearCookie(cookieName);
+        await logUserOut(req, res);
         res.sendStatus(200);
     } catch (e) {
         console.error(e);
@@ -320,8 +350,10 @@ api.post('/logout', async (req, res, next) => {
 });
 
 api.post('/passwords', async (req, res, next) => {
-
     try {
+
+        await CSRFProtection(req, res);
+
         const { body, cookies } = req;
 
         if (!cookies[cookieName]) {
@@ -352,8 +384,11 @@ api.post('/passwords', async (req, res, next) => {
 
 });
 
-api.get('/passwords/search', async (req, res, next) => {
+api.post('/passwords/search', async (req, res, next) => {
     try {
+
+        await CSRFProtection(req, res);
+
         const userId = await getUserIdFromAuthToken(req.cookies[cookieName]);
 
         if (!userId) {
@@ -370,7 +405,7 @@ api.get('/passwords/search', async (req, res, next) => {
             WHERE 
                 user_id = ? AND
                 site = ?
-        `).allAsync(userId, req.query.site);
+        `).allAsync(userId, req.body.site);
 
         res.send(rows);
     } catch (e) {
