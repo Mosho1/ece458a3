@@ -143,7 +143,7 @@ The web app implements all requirements (1-6). There's no pseudocode, the code i
 
 I provide an overview of the features below, as well as the technologies used. However, there are many implementation details that are not included here, but are in the code, such as the views, and error handling.
 
-A running instance of the app is available at <ece458a3.srolel.com>. 
+A running instance of the app is available at <https://ece458a3.srolel.com>. 
 
 The initial boilerplate was cloned from <https://github.com/mobxjs/react-mobx-boilerplate> (which I also wrote).
 
