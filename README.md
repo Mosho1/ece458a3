@@ -17,7 +17,7 @@ Defensive measures taken according to OWASP.
 
 ## Randomness
 
-All random tokens are generating using:
+All random tokens are generated using:
 
 ```typescript
 const generateToken = (length = 24) =>
