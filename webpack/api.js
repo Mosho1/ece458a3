@@ -212,16 +212,16 @@ const setCookie = (res, value) => {
     res.cookie(cookieName, value, {
         httpOnly: true,
         maxAge: 60 * 60 * 1000,
-        sameSite: true
-        // secure: true
+        sameSite: true,
+        secure: process.env.NODE_ENV === 'production'
     });
 };
 
 const setCsrfCookie = (res, value) => {
     res.cookie(csrfCookieName, value, {
         maxAge: 60 * 60 * 1000,
-        sameSite: true
-        // secure: true
+        sameSite: true,
+        secure: process.env.NODE_ENV === 'production'
     });
 };
 
