@@ -38,7 +38,7 @@ const styles = (theme: Theme) => createStyles({
     position: 'absolute',
     top: '50%',
     left: '50%',
-    marginTop: -4,
+    marginTop: -8,
     marginLeft: -12,
   },
 });
