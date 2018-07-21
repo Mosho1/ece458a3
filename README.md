@@ -143,7 +143,9 @@ All data exists in memory in the browser in the context of an ES6 module (bundle
 
 ## Additional possible defenses
 
-The database can be secured using specific database users per api endpoint that can only access the relevant data, to limit the potential consequences of SQL injection.
+1. The database can be secured using specific database users per api endpoint that can only access the relevant data, to limit the potential consequences of SQL injection.
+
+1. Automatically logging the user out after a period of inactivity.
 
 # Implementation details
 
