@@ -216,7 +216,7 @@ db.run(`
 
 1. `AppState.ts` includes all calls to those endpoints from the frontend.
 
-1. `Components/*.tsx` includes the view files for each page. Most of the components are forms and use `Form.tsx` which implements a submit button with a loader, as well as success error messages. The view React templates are quite verbose so I won't include them in the report, but they are in the attached code for the app. In addition to the success/error messages and loader, I tried to make for a nice UX, with a Material-UI layout, colors, fonts and animations.
+1. `Components/*.tsx` includes the view files for each page. Most of the components are forms and use `Form.tsx` which implements a submit button with a loader, as well as success error messages. The view React templates are quite verbose so I won't include them in the report, but they are in the attached code for the app (in each view component class' `render` method, in addition to all other view functionalities). In addition to the success/error messages and loader, I tried to make for a nice UX, with a Material-UI layout, colors, fonts and animations.
 
 ### Sign up / Register
 
