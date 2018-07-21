@@ -28,6 +28,7 @@ export class AppState {
     this.state.loggedInAs = null;
     this.state.masterKey = null;
     this.state.searchResults = null;
+    this.state.searchTerm = '';
   }
 
   setSearchTerm(value: string) {
