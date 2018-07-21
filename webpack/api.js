@@ -86,7 +86,7 @@ api.post('/register', async (req, res, next) => {
             token,
         );
 
-        const hostname = `${req.protocol}://${req.hostname}:${port}`;
+        const hostname = `${req.protocol}://${req.hostname}`;
         const confirmationUrl = `${hostname}/confirm?token=${token}`;
         await mailer.sendConfirmationEmail(unquote(body.email), confirmationUrl);
         res.sendStatus(200);
@@ -114,7 +114,7 @@ api.post('/forgot-password', async (req, res, next) => {
             WHERE id = ?
         `).runAsync(token, user.id);
 
-        const hostname = `${req.protocol}://${req.hostname}:${port}`;
+        const hostname = `${req.protocol}://${req.hostname}`;
         const recoveryUrl = `${hostname}/recover?token=${token}`;
         await mailer.sendRecoveryEmail(user.email, recoveryUrl);
         res.sendStatus(200);
