@@ -17,6 +17,7 @@ if (!alreadyExists) {
                 email TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL,
                 activationToken TEXT,
+                recoveryToken TEXT,
                 authToken TEXT,
                 salt TEXT NOT NULL,
                 active BOOLEAN NOT NULL CHECK (active IN (0,1))

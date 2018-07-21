@@ -12,7 +12,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser')
 const mailer = require('./mailer');
 const { port } = require('./constants');
-const { generateToken, getPbkdf2Hash } = require('./crypto');
+const { generateToken, getPbkdf2Hash, generateTokenWithExpiry, didTokenExpire } = require('./crypto');
 const { escape } = require('sqlstring');
 
 api.use(bodyParser.json());
@@ -26,15 +26,18 @@ let cookieSalt = 'cookieSalt';
     cookieSalt = await generateToken();
 })();
 
+const unquote = str => str.replace(/^'|'$/g, '');
+
 api.use((req, res, next) => {
     for (const field of ['body', 'query']) {
         for (let k in req[field]) {
-            req[field][k] = escape(req[field][k]);
+            req[field][k] = unquote(escape(req[field][k]));
         }
     }
 
     next();
 });
+
 
 const callbackWithError = (res, cb) => function (err) {
     if (err) {
@@ -56,8 +59,8 @@ api.post('/register', async (req, res, next) => {
         await db.runAsync(`
             INSERT INTO users (username, email, password, salt, activationToken, active) 
             VALUES (
-                ${body.username},
-                ${body.email},
+                "${body.username}",
+                "${body.email}",
                 "${getPbkdf2Hash(body.password, salt)}",
                 "${salt}",
                 "${token}",
@@ -66,7 +69,74 @@ api.post('/register', async (req, res, next) => {
         `);
         const hostname = `${req.protocol}://${req.hostname}:${port}`;
         const confirmationUrl = `${hostname}/confirm?token=${token}`;
-        await mailer.sendConfirmationEmail(body.email.replace(/^'|'$/g, ''), confirmationUrl);
+        await mailer.sendConfirmationEmail(unquote(body.email), confirmationUrl);
+        res.sendStatus(200);
+    } catch (e) {
+        console.error(e);
+        res.sendStatus(400);
+    }
+});
+
+api.post('/forgot-password', async (req, res, next) => {
+    try {
+        const { body } = req;
+
+        const token = await generateTokenWithExpiry();
+
+        const user = await getUserFromEmail(req.body.email);
+
+        if (!user) {
+            throw new Error('Could not authenticate user.');
+        }
+
+        await db.runAsync(`
+            UPDATE users SET
+                recoveryToken = "${token}"
+            WHERE id = ${user.id}
+        `);
+
+        const hostname = `${req.protocol}://${req.hostname}:${port}`;
+        const recoveryUrl = `${hostname}/recover?token=${token}`;
+        await mailer.sendRecoveryEmail(user.email, recoveryUrl);
+        res.sendStatus(200);
+    } catch (e) {
+        console.error(e);
+        res.sendStatus(400);
+    }
+});
+
+api.post('/change-password', async (req, res, next) => {
+    try {
+
+        if (didTokenExpire(req.body.token)) {
+            await db.runAsync(`
+                UPDATE users SET 
+                    recoveryToken = NULL 
+                WHERE recoveryToken = "${req.body.token}"
+            `);
+            throw new Error('token expired');
+        }
+
+        const row = await db.getAsync(`
+            SELECT count(*) 
+            FROM users 
+            WHERE recoveryToken = "${req.body.token}"
+        `);
+
+        if (row['count(*)'] !== 1) {
+            throw new Error('Could not authenticate user.');
+        }
+
+        const salt = await generateToken();
+
+        await db.runAsync(`
+            UPDATE users SET 
+                password = "${getPbkdf2Hash(req.body.password, salt)}",
+                salt = "${salt}",
+                recoveryToken = NULL 
+            WHERE recoveryToken = "${req.body.token}"
+        `);
+
         res.sendStatus(200);
     } catch (e) {
         console.error(e);
@@ -94,12 +164,12 @@ api.get('/sites', async (req, res, next) => {
     }
 });
 
-api.get('/confirm', async (req, res, next) => {
+api.post('/confirm', async (req, res, next) => {
     try {
         const row = await db.getAsync(`
             SELECT count(*) 
             FROM users 
-            WHERE activationToken = ${req.query.token}
+            WHERE activationToken = "${req.body.token}"
         `);
 
         if (row['count(*)'] !== 1) {
@@ -109,7 +179,7 @@ api.get('/confirm', async (req, res, next) => {
         await db.runAsync(`
             UPDATE users 
                 SET active = 1, activationToken = NULL 
-            WHERE activationToken = ${req.query.token}
+            WHERE activationToken = "${req.body.token}"
         `);
 
         res.sendStatus(200);
@@ -135,7 +205,7 @@ api.post('/login', async (req, res, next) => {
         const row = await db.getAsync(`
             SELECT salt, password, active 
             FROM users 
-            WHERE username = ${body.username}
+            WHERE username = "${body.username}"
         `);
 
         if (!row || !row.active) {
@@ -152,7 +222,7 @@ api.post('/login', async (req, res, next) => {
         await db.runAsync(`
             UPDATE users 
                 SET authToken = "${getPbkdf2Hash(token, cookieSalt)}"
-            WHERE username = ${body.username}
+            WHERE username = "${body.username}"
         `);
 
         setCookie(res, token);
@@ -163,7 +233,7 @@ api.post('/login', async (req, res, next) => {
     }
 });
 
-const getUser = async (authToken) => {
+const getUserFromAuthToken = async (authToken) => {
     try {
         const row = await db.getAsync(`
         SELECT *
@@ -178,8 +248,23 @@ const getUser = async (authToken) => {
     }
 };
 
-const getUserId = async (authToken) => {
-    const user = await getUser(authToken);
+const getUserFromEmail = async (email) => {
+    try {
+        const row = await db.getAsync(`
+        SELECT *
+        FROM users 
+        WHERE email = "${email}"
+    `);
+        if (!row || !row.active) return null;
+        return row;
+    } catch (e) {
+        console.error(e);
+        return null
+    }
+};
+
+const getUserIdFromAuthToken = async (authToken) => {
+    const user = await getUserFromAuthToken(authToken);
     return user ? user.id : null;
 };
 
@@ -191,7 +276,7 @@ api.post('/refresh', async (req, res, next) => {
             return res.sendStatus(401);
         }
 
-        const user = await getUser(cookies[cookieName]);
+        const user = await getUserFromAuthToken(cookies[cookieName]);
 
         if (!user) {
             return res.sendStatus(401);
@@ -241,7 +326,7 @@ api.post('/passwords', async (req, res, next) => {
             return res.sendStatus(401);
         }
 
-        const userId = await getUserId(cookies[cookieName]);
+        const userId = await getUserIdFromAuthToken(cookies[cookieName]);
 
         if (!userId) {
             return res.sendStatus(401);
@@ -250,9 +335,9 @@ api.post('/passwords', async (req, res, next) => {
         await db.runAsync(`
             INSERT INTO passwords (site, site_username, site_password, user_id)
             VALUES (
-                ${body.site || 'NULL'},
-                ${body.site_username || 'NULL'},
-                ${body.site_password || 'NULL'},
+                ${body.site ? `"${body.site}"` : 'NULL'},
+                ${body.site_username ? `"${body.site_username}"` : 'NULL'},
+                ${body.site_password ? `"${body.site_password}"` : 'NULL'},
                 ${userId}
             )
         `);
@@ -267,7 +352,7 @@ api.post('/passwords', async (req, res, next) => {
 
 api.get('/passwords/search', async (req, res, next) => {
     try {
-        const userId = await getUserId(req.cookies[cookieName]);
+        const userId = await getUserIdFromAuthToken(req.cookies[cookieName]);
 
         if (!userId) {
             return res.sendStatus(401);
@@ -282,7 +367,7 @@ api.get('/passwords/search', async (req, res, next) => {
             FROM passwords 
             WHERE 
                 user_id = ${userId} AND
-                site = ${req.query.site}
+                site = "${req.query.site}"
         `);
 
         res.send(rows);

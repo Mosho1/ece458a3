@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import AppState from '../stores/AppState';
 import Link from './Link';
 import { withStyles, createStyles } from '@material-ui/core/styles';
-import { Grid, Paper, Theme, WithStyles, FormControl, InputLabel, Input, Button, CircularProgress } from '@material-ui/core';
+import { Grid, Paper, Theme, WithStyles, FormControl, InputLabel, Input, Button, CircularProgress, Typography } from '@material-ui/core';
 import { action, observable, runInAction } from 'mobx';
 import { green } from '@material-ui/core/colors';
 
@@ -36,21 +36,10 @@ const styles = (theme: Theme) => createStyles({
 
 interface Props extends WithStyles<typeof styles> {
   appState: AppState;
-  context: 'login' | 'register'
 }
 
 @observer
 export class Login extends React.Component<Props, any> {
-
-  constructor(props: Props) {
-    super(props);
-    if (props.appState.loginPage) {
-      this.mState = props.appState.loginPage.mState;
-    }
-    runInAction(() => {
-      props.appState.loginPage = this;
-    });
-  }
 
   componentDidMount() {
     this.resetForm();
@@ -77,17 +66,10 @@ export class Login extends React.Component<Props, any> {
 
   onSubmit = action(async (e: any) => {
     e.preventDefault();
-    const { context, appState } = this.props;
+    const { appState } = this.props;
     try {
       this.mState.loading = true;
-      switch (context) {
-        case 'login':
-          await appState.login(this.mState.form);
-          break;
-        case 'register':
-          await appState.register(this.mState.form);
-          break;
-      }
+      await appState.login(this.mState.form);
     } finally {
       this.resetForm();
       runInAction(() => this.mState.loading = false);
@@ -107,7 +89,7 @@ export class Login extends React.Component<Props, any> {
   });
 
   render() {
-    const { context, appState, classes } = this.props;
+    const { appState, classes } = this.props;
     return (
       <Grid justify="center" container spacing={24}>
         <Grid item xs={12} sm={10} md={8} lg={4} xl={3}>
@@ -116,23 +98,13 @@ export class Login extends React.Component<Props, any> {
               <form onSubmit={this.onSubmit} className={classes.form}>
                 <Grid item xs={12}>
                   <FormControl required className={classes.formControl}>
-                    <InputLabel htmlFor="username">Name</InputLabel>
+                    <InputLabel htmlFor="username">Username</InputLabel>
                     <Input
                       id="username"
                       value={this.mState.form.username}
                       onChange={this.onChangeUsername} />
                   </FormControl>
                 </Grid>
-                {context === 'register' && <Grid item xs={12}>
-                  <FormControl required className={classes.formControl}>
-                    <InputLabel htmlFor="email">Email</InputLabel>
-                    <Input
-                      type="email"
-                      id="email"
-                      value={this.mState.form.email}
-                      onChange={this.onChangeEmail} />
-                  </FormControl>
-                </Grid>}
                 <Grid item xs={12}>
                   <FormControl required className={classes.formControl}>
                     <InputLabel htmlFor="password">Password</InputLabel>
@@ -151,7 +123,7 @@ export class Login extends React.Component<Props, any> {
                       type="submit"
                       color="primary"
                       className={classes.button}>
-                      {context === 'register' ? 'Register' : 'Login'}
+                      Login
                     </Button>
                     {this.mState.loading &&
                       <CircularProgress
@@ -161,6 +133,9 @@ export class Login extends React.Component<Props, any> {
                   </FormControl>
                 </Grid>
               </form>
+              <Grid item xs={12}>
+                <Typography><Link href="/forgot">Forgot password?</Link></Typography>
+              </Grid>
             </Grid>
           </Paper>
         </Grid>

@@ -1,7 +1,7 @@
 const express = require('express');
 const http = require('http');
 const host = process.env.HOST || '0.0.0.0';
-const { prodPort } = require('./webpack/constants');
+const { port } = require('./webpack/constants');
 const api = require('./webpack/api');
 const root = __dirname;
 const history = require('connect-history-api-fallback');
@@ -14,8 +14,8 @@ app.use(history());
 app.use(express.static(root + '/build'));
 
 const server = http.createServer(app);
-server.listen(prodPort, host, serverStarted);
+server.listen(port, host, serverStarted);
 
 function serverStarted() {
-    console.log('Server started at', host, prodPort);
+    console.log('Server started at', host, port);
 }

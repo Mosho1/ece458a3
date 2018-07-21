@@ -15,14 +15,12 @@ export interface Site {
 * This is the entry point for the app's state. All stores should go here.
 */
 export class AppState {
-  @observable loginPage: Login = null;
-  @observable search: Search = null;
-  @observable add: Add = null;
   @observable loggedInAs: string | null = null;
   @observable masterKey: string | null = null;
   @observable searchTerm = '';
   @observable searchResults: Site[] | null = null;
 
+  @action
   resetState() {
     this.loggedInAs = null;
     this.masterKey = null;
@@ -41,7 +39,6 @@ export class AppState {
     return decrypt(this.masterKey);
   }
 
-  @action
   onUnauthorized() {
     this.resetState();
     this.goTo('/login');
@@ -127,6 +124,28 @@ export class AppState {
       })
     });
   }
+
+  async forgotPassword(form: { email: string }) {
+    await this.apiRequest('forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: form.email,
+      })
+    });
+  }
+
+  async changePassword(form: { password: string }) {
+    const params = new URLSearchParams(location.search.slice(1));
+    const token = params.get('token');
+    if (!token) throw new Error('could not change password');
+    await this.apiRequest('change-password', {
+      method: 'POST',
+      body: JSON.stringify({
+        password: form.password,
+        token
+      })
+    });
+  }
   @observable confirmAccountStatus: 'start' | 'success' | 'failure' = 'start';
 
   async confirmAccount() {
@@ -135,7 +154,12 @@ export class AppState {
       const params = new URLSearchParams(location.search.slice(1));
       const token = params.get('token');
       if (!token) throw new Error('could not confirm account');
-      await this.apiRequest(`confirm?token=${token}`);
+      await this.apiRequest(`confirm`, {
+        method: 'POST',
+        body:JSON.stringify({
+          token
+        })
+      });
       this.confirmAccountStatus = 'success';
     } catch (e) {
       console.error(e);

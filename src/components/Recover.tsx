@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import AppState from '../stores/AppState';
 import Link from './Link';
 import { withStyles, createStyles } from '@material-ui/core/styles';
-import { Grid, Paper, Theme, WithStyles, FormControl, InputLabel, Input, Button, CircularProgress } from '@material-ui/core';
+import { Grid, Paper, Theme, WithStyles, FormControl, InputLabel, Input, Button, CircularProgress, FormHelperText } from '@material-ui/core';
 import { action, observable, runInAction } from 'mobx';
 import { green } from '@material-ui/core/colors';
 
@@ -36,74 +36,60 @@ const styles = (theme: Theme) => createStyles({
 
 interface Props extends WithStyles<typeof styles> {
   appState: AppState;
-  context: 'login' | 'register'
 }
 
 @observer
-export class Add extends React.Component<Props, any> {
+export class Register extends React.Component<Props, any> {
+
   componentDidMount() {
     this.resetForm();
   }
 
   @observable mState = {
     loading: false,
+    passwordMismatch: false,
     form: {
-      site: '',
-      site_username: '',
-      site_password: ''
+      password: '',
+      repeatPassword: '',
     }
   };
 
   @action
   resetForm() {
+    this.mState.loading = false;
+    this.mState.passwordMismatch = false;
     this.mState.form = {
-      site: '',
-      site_username: '',
-      site_password: ''
+      password: '',
+      repeatPassword: '',
     };
-  }
-
-  async addSite() {
-    const { appState } = this.props;
-    const site_username = await appState.encrypt(this.mState.form.site_username);
-    const site_password = await appState.encrypt(this.mState.form.site_password);
-    const res = await appState.apiRequest('passwords', {
-      method: 'POST',
-      body: JSON.stringify({
-        site: this.mState.form.site,
-        site_password,
-        site_username,
-      })
-    });
-
-    this.resetForm();
   }
 
   onSubmit = action(async (e: any) => {
     e.preventDefault();
-    const { context, appState } = this.props;
+    const { appState } = this.props;
+    const { form } = this.mState;
+    if (form.password !== form.repeatPassword) return;
     try {
       this.mState.loading = true;
-      await this.addSite();
+      await appState.changePassword(form);
     } finally {
+      this.resetForm();
       runInAction(() => this.mState.loading = false);
     }
+  })
+
+  onChangePassword = action((e: React.ChangeEvent<HTMLInputElement>) => {
+    this.mState.form.password = e.target.value;
   });
 
-  onChangeSite = action((e: React.ChangeEvent<HTMLInputElement>) => {
-    this.mState.form.site = e.target.value;
-  });
-
-  onChangeSiteUsername = action((e: React.ChangeEvent<HTMLInputElement>) => {
-    this.mState.form.site_username = e.target.value;
-  });
-
-  onChangeSitePassword = action((e: React.ChangeEvent<HTMLInputElement>) => {
-    this.mState.form.site_password = e.target.value;
+  onChangeRepeatPassword = action((e: React.ChangeEvent<HTMLInputElement>) => {
+    const { form } = this.mState;
+    form.repeatPassword = e.target.value;
+    this.mState.passwordMismatch = form.password !== form.repeatPassword;
   });
 
   render() {
-    const { context, appState, classes } = this.props;
+    const { appState, classes } = this.props;
     return (
       <Grid justify="center" container spacing={24}>
         <Grid item xs={12} sm={10} md={8} lg={4} xl={3}>
@@ -112,29 +98,25 @@ export class Add extends React.Component<Props, any> {
               <form onSubmit={this.onSubmit} className={classes.form}>
                 <Grid item xs={12}>
                   <FormControl required className={classes.formControl}>
-                    <InputLabel htmlFor="username">Site</InputLabel>
-                    <Input
-                      id="username"
-                      value={this.mState.form.site}
-                      onChange={this.onChangeSite} />
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12}>
-                  <FormControl className={classes.formControl}>
-                    <InputLabel htmlFor="email">Username</InputLabel>
-                    <Input
-                      id="email"
-                      value={this.mState.form.site_username}
-                      onChange={this.onChangeSiteUsername} />
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12}>
-                  <FormControl className={classes.formControl}>
                     <InputLabel htmlFor="password">Password</InputLabel>
                     <Input
                       id="password"
-                      value={this.mState.form.site_password}
-                      onChange={this.onChangeSitePassword} />
+                      type="password"
+                      value={this.mState.form.password}
+                      onChange={this.onChangePassword} />
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12}>
+                  <FormControl error={this.mState.passwordMismatch} required className={classes.formControl}>
+                    <InputLabel htmlFor="repeat-password">Repeat password</InputLabel>
+                    <Input
+                      id="repeat-password"
+                      type="password"
+                      value={this.mState.form.repeatPassword}
+                      onChange={this.onChangeRepeatPassword} />
+                    {this.mState.passwordMismatch &&
+                      <FormHelperText id="repeat-password-text">Passwords don't match</FormHelperText>
+                    }
                   </FormControl>
                 </Grid>
                 <Grid item xs={12}>
@@ -145,7 +127,7 @@ export class Add extends React.Component<Props, any> {
                       type="submit"
                       color="primary"
                       className={classes.button}>
-                      Add
+                      Recover
                     </Button>
                     {this.mState.loading &&
                       <CircularProgress
@@ -163,4 +145,4 @@ export class Add extends React.Component<Props, any> {
   }
 }
 
-export default withStyles(styles)(Add);
+export default withStyles(styles)(Register);

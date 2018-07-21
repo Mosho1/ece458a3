@@ -55,13 +55,25 @@ routes = [{
   // onEnter: authenticateRoute(false),
   async getComponent(appState, params) {
     const Login = await getRoute(import('./components/Login'));
-    return <Login context={'login'} appState={appState} />;
+    return <Login appState={appState} />;
   }
 }, {
   route: '/register',
   async getComponent(appState, params) {
-    const Login = await getRoute(import('./components/Login'));
-    return <Login context={'register'} appState={appState} />;
+    const Register = await getRoute(import('./components/Register'));
+    return <Register appState={appState} />;
+  }
+}, {
+  route: '/forgot',
+  async getComponent(appState, params) {
+    const Forgot = await getRoute(import('./components/Forgot'));
+    return <Forgot appState={appState} />;
+  }
+}, {
+  route: '/recover',
+  async getComponent(appState, params) {
+    const Recover = await getRoute(import('./components/Recover'));
+    return <Recover appState={appState} />;
   }
 }, {
   route: '/add',

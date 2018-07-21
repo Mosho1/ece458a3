@@ -30,6 +30,16 @@ const sendConfirmationEmail = (email, confirmationUrl) => {
     });
 };
 
+const sendRecoveryEmail = (email, recoveryUrl) => {
+    return transporter.sendMailAsync({
+        from: 'admin@srolel.com',
+        to: email,
+        subject: 'Recover password',
+        text: `Please use this link to reset your password: ${recoveryUrl}`,
+    });
+};
+
 module.exports = {
-    sendConfirmationEmail
+    sendConfirmationEmail,
+    sendRecoveryEmail
 };

@@ -41,9 +41,19 @@ const decrypt = key => value => {
     ));
 };
 
+const generateTokenWithExpiry = async (expiryInMs = 1000 * 60 * 60, length = 24) => {
+    return (Number(new Date()) + expiryInMs) + await generateToken();
+};
+
+const didTokenExpire = (token) => {
+    return Number(new Date()) > Number(token.slice(0, 13));
+};
+
 module.exports = {
     getPbkdf2Hash,
     generateToken,
     encrypt,
-    decrypt
+    decrypt,
+    generateTokenWithExpiry,
+    didTokenExpire
 };
