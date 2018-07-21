@@ -20,8 +20,6 @@ class App {
   router: Router<Route>;
 
   constructor(appState?: AppState, router?: Router<Route>) {
-    window['app'] = this;
-
     // we optionally reload the state useful for hot reload and server-side rendering, 
     // but also as an extension point for restoring the data from localStorage.
     this.appState = new AppState().reload(appState);
