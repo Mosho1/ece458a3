@@ -163,26 +163,6 @@ api.post('/change-password', async (req, res, next) => {
     }
 });
 
-api.get('/users', async (req, res, next) => {
-    try {
-        const users = await db.allAsync(`SELECT * from users`);
-        res.send(users);
-    } catch (e) {
-        console.error(e);
-        res.sendStatus(400);
-    }
-});
-
-api.get('/sites', async (req, res, next) => {
-    try {
-        const users = await db.allAsync(`SELECT * from passwords`);
-        res.send(users);
-    } catch (e) {
-        console.error(e);
-        res.sendStatus(400);
-    }
-});
-
 api.post('/confirm', async (req, res, next) => {
     try {
         const row = await db.prepare(`
