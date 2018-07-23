@@ -11,6 +11,11 @@
 
 I realize this may be beyond the planned scope of the assignment, however I enjoyed learning about security and cryptography, and I also enjoy making web apps. So I thought I'd go the extra mile :)
 
+# Overview
+
+The web app implements all requirements (1-6). There's no pseudocode, the code is available at <https://git.uwaterloo.ca/srolel/ece-458-a3> (and a private GitHub repository that I deploy from), and It's also included in this submission.
+
+A running instance of the app is available at <https://ece458a3.srolel.com>. You can sign up with a confirmable email, and there's also a user "demo" with password "demo".
 
 # List of defenses
 
@@ -168,12 +173,7 @@ All data exists in memory in the browser in the context of an ES6 module (bundle
 
 # Implementation details
 
-The web app implements all requirements (1-6). There's no pseudocode, the code is available at 
-<https://git.uwaterloo.ca/srolel/ece-458-a3> (and a private GitHub repository that I deploy from). It's also included in this submission. 
-
 I provide an overview of the features below, as well as the technologies used. However, there are many implementation details that are not included here, but are in the code, such as the views, and error handling.
-
-A running instance of the app is available at <https://ece458a3.srolel.com>. 
 
 The initial boilerplate was cloned from <https://github.com/mobxjs/react-mobx-boilerplate> (which I also wrote).
 
